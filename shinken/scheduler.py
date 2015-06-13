@@ -179,6 +179,12 @@ class Scheduler(object):
         self.triggers.compile()
         self.triggers.load_objects(self)
 
+        
+        logger.debug("TFLK conf %s" % conf.__class__)
+        self.customers = conf.customers
+        self.contracts = conf.contracts
+        self.cpes = conf.cpes
+        self.potses = conf.potses
 
         if not in_test:
             # Commands in the host/services/contacts are not real one
@@ -618,6 +624,8 @@ class Scheduler(object):
                           ):
         res = []
         now = time.time()
+
+        logger.debug("TFLK get_to_run_checks do_checks=%s, do_actions=%s worker_name=%s, module_types=%s" % (do_checks, do_actions, worker_name, module_types))
 
         # If poller want to do checks
         if do_checks:
@@ -1219,7 +1227,8 @@ class Scheduler(object):
         initial_status_types = (self.timeperiods, self.commands,
                                 self.contacts, self.contactgroups,
                                 self.hosts, self.hostgroups,
-                                self.services, self.servicegroups)
+                                self.services, self.servicegroups,
+                                self.customers, self.contracts, self.cpes, self.potses)
 
         self.conf.skip_initial_broks = getattr(self.conf, 'skip_initial_broks', False)
         logger.debug("Skipping initial broks? %s", str(self.conf.skip_initial_broks))

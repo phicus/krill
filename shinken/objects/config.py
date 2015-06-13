@@ -67,6 +67,10 @@ from discoveryrule import Discoveryrule, Discoveryrules
 from discoveryrun import Discoveryrun, Discoveryruns
 from hostextinfo import HostExtInfo, HostsExtInfo
 from serviceextinfo import ServiceExtInfo, ServicesExtInfo
+from customer import Customer, Customers
+from contract import Contract, Contracts
+from cpe import Cpe, Cpes
+from pots import Pots, Potses
 from trigger import Triggers
 from pack import Packs
 from shinken.util import split_semicolon
@@ -739,6 +743,14 @@ class Config(Item):
             (HostExtInfo, HostsExtInfo, 'hostsextinfo', True),
         'serviceextinfo':
             (ServiceExtInfo, ServicesExtInfo, 'servicesextinfo', True),
+        'customer':
+           (Customer, Customers, 'customers', True),
+        'contract':
+           (Contract, Contracts, 'contracts', True),
+        'cpe':
+           (Cpe, Cpes, 'cpes', True),
+        'pots':
+           (Pots, Potses, 'potses', True),
     }
 
     # This tab is used to transform old parameters name into new ones
@@ -760,7 +772,9 @@ class Config(Item):
                            'reactionner', 'broker', 'receiver', 'poller', 'realm', 'module',
                            'resultmodulation', 'escalation', 'serviceescalation', 'hostescalation',
                            'discoveryrun', 'discoveryrule', 'businessimpactmodulation',
-                           'hostextinfo', 'serviceextinfo']
+                           'hostextinfo', 'serviceextinfo', 
+                           'customer', 'contract', 'cpe', 'pots'
+                           ]
 
 
     def __init__(self):
@@ -1245,6 +1259,10 @@ class Config(Item):
         self.reactionners.linkify(self.realms, self.modules)
         self.pollers.linkify(self.realms, self.modules)
 
+        self.contracts.linkify(self.customers)
+        self.cpes.linkify(self.contracts)
+        self.potses.linkify(self.cpes)
+
         # Ok, now update all realms with backlinks of
         # satellites
         self.realms.prepare_for_satellites_conf()
@@ -1539,6 +1557,11 @@ class Config(Item):
         self.businessimpactmodulations.fill_default()
         self.hostsextinfo.fill_default()
         self.servicesextinfo.fill_default()
+
+        self.customers.fill_default()
+        self.contracts.fill_default()
+        self.cpes.fill_default()
+        self.potses.fill_default()
 
         # Now escalations
         self.escalations.fill_default()
@@ -1998,7 +2021,8 @@ class Config(Item):
     def explode_global_conf(self):
         clss = [Service, Host, Contact, SchedulerLink,
                 PollerLink, ReactionnerLink, BrokerLink,
-                ReceiverLink, ArbiterLink, HostExtInfo]
+                ReceiverLink, ArbiterLink, HostExtInfo,
+                Customer, Contract, CPE, POTS]
         for cls in clss:
             cls.load_global_conf(self)
 
@@ -2300,6 +2324,10 @@ class Config(Item):
             cur_conf.hosts = []  # will be fill after
             cur_conf.services = []  # will be fill after
             # The elements of the others conf will be tag here
+            cur_conf.customers = self.customers
+            cur_conf.contracts = self.contracts
+            cur_conf.cpes = self.cpes
+            cur_conf.potses = self.potses
             cur_conf.other_elements = {}
             # if a scheduler have accepted the conf
             cur_conf.is_assigned = False
@@ -2415,6 +2443,10 @@ class Config(Item):
                          "discoveryruns",
                          "schedulers",
                          "realms",
+                         "customers",
+                         "contracts",
+                         "cpes",
+                         "potses",
                          ):
             objs = [jsonify_r(i) for i in getattr(self, category)]
             container = getattr(self, category)
