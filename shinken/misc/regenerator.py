@@ -40,6 +40,10 @@ from shinken.objects.reactionnerlink import ReactionnerLink, ReactionnerLinks
 from shinken.objects.pollerlink import PollerLink, PollerLinks
 from shinken.objects.brokerlink import BrokerLink, BrokerLinks
 from shinken.objects.receiverlink import ReceiverLink, ReceiverLinks
+from shinken.objects.customer import Customer, Customers
+#from shinken.objects.contract import Contract, Contracts
+from shinken.objects.cpe import Cpe, Cpes
+from shinken.objects.pots import Pots, Potses
 from shinken.util import safe_print
 from shinken.message import Message
 
@@ -65,6 +69,10 @@ class Regenerator(object):
         self.reactionners = ReactionnerLinks([])
         self.brokers = BrokerLinks([])
         self.receivers = ReceiverLinks([])
+        self.customers = Customers([])
+        #self.contracts = Contracts([])
+        self.cpes = Cpes([])
+        self.potses = Potses([])
         # From now we only look for realms names
         self.realms = set()
         self.tags = {}
@@ -76,6 +84,11 @@ class Regenerator(object):
         self.inp_hostgroups = {}
         self.inp_servicegroups = {}
         self.inp_contactgroups = {}
+        self.inp_customers = {}
+        #self.inp_contracts = {}
+        self.inp_cpes = {}
+        self.inp_potses = {}
+
 
         # Do not ask for full data resent too much
         self.last_need_data_send = time.time()
@@ -117,6 +130,10 @@ class Regenerator(object):
         self.contactgroups = c.contactgroups
         self.timeperiods = c.timeperiods
         self.commands = c.commands
+        self.customers = c.customers
+        #self.contracts = c.contracts
+        self.cpes = c.cpes
+        self.potses = c.potses
         # We also load the realm
         for h in self.hosts:
             self.realms.add(h.realm)
@@ -132,7 +149,9 @@ class Regenerator(object):
                                      'initial_hostgroup_status', 'initial_service_status',
                                      'initial_servicegroup_status', 'initial_contact_status',
                                      'initial_contactgroup_status', 'initial_timeperiod_status',
-                                     'initial_command_status']
+                                     'initial_command_status',
+                                     'initial_customer_status',
+                                     'initial_cpe_status', 'initial_pots_status']
         # Ok you are wondering why we don't add initial_broks_done?
         # It's because the LiveSTatus modules need this part to do internal things.
         # But don't worry, the vanilla regenerator will just skip it in all_done_linking :D
@@ -179,6 +198,10 @@ class Regenerator(object):
             inp_contactgroups = self.inp_contactgroups[inst_id]
             inp_services = self.inp_services[inst_id]
             inp_servicegroups = self.inp_servicegroups[inst_id]
+            inp_customers = self.inp_customers[inst_id]
+            #inp_contracts = self.inp_contracts[inst_id]
+            inp_cpes = self.inp_cpes[inst_id]
+            inp_potses = self.inp_potses[inst_id]
         except Exception, exp:
             print "Warning all done: ", exp
             return
@@ -349,6 +372,18 @@ class Regenerator(object):
             else:  # else take the new one
                 self.contactgroups.add_item(inpcg)
 
+        for customer in inp_customers:
+            self.customers.add_item(customer)
+
+        #for contract in inp_contracts:
+        #    self.contracts.add_item(contract)
+
+        for cpe in inp_cpes:
+            self.cpes.add_item(cpe)
+
+        for pots in inp_potses:
+            self.potses.add_item(pots)
+
         safe_print("ALL LINKING TIME" * 10, time.time() - start)
 
         # clean old objects
@@ -357,6 +392,10 @@ class Regenerator(object):
         del self.inp_contactgroups[inst_id]
         del self.inp_services[inst_id]
         del self.inp_servicegroups[inst_id]
+        del self.inp_customers[inst_id]
+        #del self.inp_contracts[inst_id]
+        del self.inp_cpes[inst_id]
+        del self.inp_potses[inst_id]
 
 
     # We look for o.prop (CommandCall) and we link the inner
@@ -488,6 +527,10 @@ class Regenerator(object):
         self.inp_hostgroups[c_id] = Hostgroups([])
         self.inp_servicegroups[c_id] = Servicegroups([])
         self.inp_contactgroups[c_id] = Contactgroups([])
+        self.inp_customers[c_id] = Customers([])
+        #self.inp_contracts[c_id] = Contracts([])
+        self.inp_cpes[c_id] = Cpes([])
+        self.inp_potses[c_id] = Potses([])
 
         # And we save it
         self.configs[c_id] = c
@@ -724,6 +767,70 @@ class Regenerator(object):
             self.update_element(tp, data)
             self.timeperiods.add_item(tp)
 
+
+    def manage_initial_customer_status_brok(self, b):
+        data = b.data
+        cid = data['id']
+        safe_print("TFLK Customer with data", data)
+
+        c = self.customers.find_by_id(cid)
+        if c:
+            safe_print("Already existing customer %s updating it" % cid)
+            self.update_element(c, data)
+        else:
+            safe_print("Creating a new customer")
+            c = Customer({})
+            self.update_element(c, data)
+            c.set_additional_attributes()
+            self.customers.add_item(c)
+
+
+    # def manage_initial_contract_status_brok(self, b):
+    #     data = b.data
+    #     cid = data['id']
+    #     safe_print("TFLK Contract with data", data)
+
+    #     c = self.contracts.find_by_id(cid)
+    #     if c:
+    #         safe_print("Already existing contract %s updating it" % cid)
+    #         self.update_element(c, data)
+    #     else:
+    #         safe_print("Creating a new contract")
+    #         c = Contract({})
+    #         self.update_element(c, data)
+    #         self.contracts.add_item(c)
+
+
+    def manage_initial_cpe_status_brok(self, b):
+        data = b.data
+        cid = data['id']
+        safe_print("TFLK CPE with data", data)
+
+        c = self.cpes.find_by_id(cid)
+        if c:
+            safe_print("Already existing CPE %s updating it" % cid)
+            self.update_element(c, data)
+        else:
+            safe_print("Creating a new CPE")
+            c = Cpe({})
+            self.update_element(c, data)
+            self.cpes.add_item(c)
+
+
+    def manage_initial_pots_status_brok(self, b):
+        data = b.data
+        cid = data['id']
+        safe_print("TFLK POTS with data", data)
+
+        c = self.potses.find_by_id(cid)
+        if c:
+            safe_print("Already existing POTS %s updating it" % cid)
+            self.update_element(c, data)
+        else:
+            safe_print("Creating a new POTS")
+            c = Pots({})
+            self.update_element(c, data)
+            self.potses.add_item(c)
 
     # For command we got 2 cases: do we already got the command or not.
     # if got: just update it

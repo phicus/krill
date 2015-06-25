@@ -68,7 +68,7 @@ from discoveryrun import Discoveryrun, Discoveryruns
 from hostextinfo import HostExtInfo, HostsExtInfo
 from serviceextinfo import ServiceExtInfo, ServicesExtInfo
 from customer import Customer, Customers
-from contract import Contract, Contracts
+#from contract import Contract, Contracts
 from cpe import Cpe, Cpes
 from pots import Pots, Potses
 from trigger import Triggers
@@ -745,8 +745,8 @@ class Config(Item):
             (ServiceExtInfo, ServicesExtInfo, 'servicesextinfo', True),
         'customer':
            (Customer, Customers, 'customers', True),
-        'contract':
-           (Contract, Contracts, 'contracts', True),
+#        'contract':
+#           (Contract, Contracts, 'contracts', True),
         'cpe':
            (Cpe, Cpes, 'cpes', True),
         'pots':
@@ -773,7 +773,7 @@ class Config(Item):
                            'resultmodulation', 'escalation', 'serviceescalation', 'hostescalation',
                            'discoveryrun', 'discoveryrule', 'businessimpactmodulation',
                            'hostextinfo', 'serviceextinfo', 
-                           'customer', 'contract', 'cpe', 'pots'
+                           'customer', 'cpe', 'pots'
                            ]
 
 
@@ -1259,8 +1259,8 @@ class Config(Item):
         self.reactionners.linkify(self.realms, self.modules)
         self.pollers.linkify(self.realms, self.modules)
 
-        self.contracts.linkify(self.customers)
-        self.cpes.linkify(self.contracts)
+        #self.contracts.linkify(self.customers)
+        self.cpes.linkify(self.customers)
         self.potses.linkify(self.cpes)
 
         # Ok, now update all realms with backlinks of
@@ -1559,7 +1559,7 @@ class Config(Item):
         self.servicesextinfo.fill_default()
 
         self.customers.fill_default()
-        self.contracts.fill_default()
+        #self.contracts.fill_default()
         self.cpes.fill_default()
         self.potses.fill_default()
 
@@ -2022,7 +2022,7 @@ class Config(Item):
         clss = [Service, Host, Contact, SchedulerLink,
                 PollerLink, ReactionnerLink, BrokerLink,
                 ReceiverLink, ArbiterLink, HostExtInfo,
-                Customer, Contract, CPE, POTS]
+                Customer, Cpe, Pots]
         for cls in clss:
             cls.load_global_conf(self)
 
@@ -2325,7 +2325,7 @@ class Config(Item):
             cur_conf.services = []  # will be fill after
             # The elements of the others conf will be tag here
             cur_conf.customers = self.customers
-            cur_conf.contracts = self.contracts
+            #cur_conf.contracts = self.contracts
             cur_conf.cpes = self.cpes
             cur_conf.potses = self.potses
             cur_conf.other_elements = {}
@@ -2444,7 +2444,7 @@ class Config(Item):
                          "schedulers",
                          "realms",
                          "customers",
-                         "contracts",
+                         #"contracts",
                          "cpes",
                          "potses",
                          ):

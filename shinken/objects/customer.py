@@ -25,7 +25,7 @@ class Customer(Item):
 
     running_properties = Item.running_properties.copy()
     running_properties.update({
-        'contracts': StringProp(default=[], fill_brok=['full_status']),
+        'cpes': StringProp(default=[], fill_brok=['full_status']),
     })
 
     def __init__(self, params={}):
@@ -35,14 +35,13 @@ class Customer(Item):
         self.comment = None
         self.created = None
         self.updated = None
-        self.contracts = []
+        self.cpes = []
         for key in params:
             if key in ['id', 'name', 'surname', 'comment', 'created', 'updated']:
                 safe_print("TFLK Customer %s -> %s" % (key, self.properties[key].pythonize(params[key])))
                 setattr(self, key, self.properties[key].pythonize(params[key]))
-            elif key == 'contracts':
-                self.contracts = params[key]
-                #self.contracts = [Contract(d) for d in params[key]]
+            elif key == 'cpes':
+                self.cpes = params[key]
         self.set_additional_attributes()
 
 
@@ -61,9 +60,9 @@ class Customer(Item):
 
     __str__ = __repr__
 
-    def add_contract_link(self, contract):
-        logger.debug("TFLK add_contract_link %s <- %s" % (self, contract))
-        self.contracts.append(contract)
+    def add_cpe_link(self, cpe):
+        logger.debug("TFLK add_cpe_link %s <- %s" % (self, cpe))
+        self.cpes.append(cpe)
 
 class Customers(Items):
     name_property = 'id'

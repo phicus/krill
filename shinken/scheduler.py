@@ -182,7 +182,7 @@ class Scheduler(object):
         
         logger.debug("TFLK conf %s" % conf.__class__)
         self.customers = conf.customers
-        self.contracts = conf.contracts
+        #self.contracts = conf.contracts
         self.cpes = conf.cpes
         self.potses = conf.potses
 
@@ -1228,7 +1228,7 @@ class Scheduler(object):
                                 self.contacts, self.contactgroups,
                                 self.hosts, self.hostgroups,
                                 self.services, self.servicegroups,
-                                self.customers, self.contracts, self.cpes, self.potses)
+                                self.customers, self.cpes, self.potses)
 
         self.conf.skip_initial_broks = getattr(self.conf, 'skip_initial_broks', False)
         logger.debug("Skipping initial broks? %s", str(self.conf.skip_initial_broks))

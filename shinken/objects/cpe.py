@@ -11,7 +11,7 @@ class Cpe(Item):
     properties = Item.properties.copy()
     properties.update({
         'id': IntegerProp(fill_brok=['full_status']),
-        'contractid': IntegerProp(fill_brok=['full_status']),
+        'customerid': IntegerProp(fill_brok=['full_status']),
         'sn': StringProp(fill_brok=['full_status']),
         'mac': StringProp(fill_brok=['full_status']),
         'mtamac': StringProp(fill_brok=['full_status']),
@@ -22,14 +22,14 @@ class Cpe(Item):
 
     running_properties = Item.running_properties.copy()
     running_properties.update({
-        'contract': StringProp(default=None, fill_brok=['full_status']),
+        'customer': StringProp(default=None, fill_brok=['full_status']),
         'profile': StringProp(default=None, fill_brok=['full_status']),
         'potses': ListProp(fill_brok=['full_status'], default=None),
     })
 
     def __init__(self, params={}):
         self.id = None
-        self.contractid = None
+        self.customerid = None
         self.sn = None
         self.mac = None
         self.mtamac = None
@@ -38,7 +38,7 @@ class Cpe(Item):
         self.access = None
         self.potses = []
         for key in params:
-            if key in ['id', 'contractid', 'sn', 'mac', 'mtamac', 'model', 'profileid', 'access']:
+            if key in ['id', 'customerid', 'sn', 'mac', 'mtamac', 'model', 'profileid', 'access']:
                 setattr(self, key, self.properties[key].pythonize(params[key]))
 
     def __repr__(self):
@@ -51,11 +51,11 @@ class Cpes(Items):
     name_property = 'id'
     inner_class = Cpe
 
-    def linkify(self, contracts):
+    def linkify(self, customers):
         for cpe in self:
-            contract = contracts.items[cpe.contractid]
-            cpe.contract = contract
-            contract.cpe = cpe
+            customer = customers.items[cpe.customerid]
+            cpe.customer = customer
+            customer.add_cpe_link(cpe)
 
     def find_by_id(self, id):
         return self.items.get(id, None)
