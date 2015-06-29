@@ -70,7 +70,6 @@ class Regenerator(object):
         self.brokers = BrokerLinks([])
         self.receivers = ReceiverLinks([])
         self.customers = Customers([])
-        self.customers = Customers([])
         self.cpe_profiles = CpeProfiles([])
         self.cpes = Cpes([])
         self.potses = Potses([])

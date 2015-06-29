@@ -746,8 +746,6 @@ class Config(Item):
             (ServiceExtInfo, ServicesExtInfo, 'servicesextinfo', True),
         'customer':
            (Customer, Customers, 'customers', True),
-#        'contract':
-#           (Contract, Contracts, 'contracts', True),
         'cpe':
            (Cpe, Cpes, 'cpes', True),
         'cpe_profile':
@@ -1262,7 +1260,6 @@ class Config(Item):
         self.reactionners.linkify(self.realms, self.modules)
         self.pollers.linkify(self.realms, self.modules)
 
-        #self.contracts.linkify(self.customers)
         self.cpes.linkify(self.customers, self.cpe_profiles)
         self.potses.linkify(self.cpes)
 
@@ -1562,7 +1559,7 @@ class Config(Item):
         self.servicesextinfo.fill_default()
 
         self.customers.fill_default()
-        #self.contracts.fill_default()
+        self.cpe_profiles.fill_default()
         self.cpes.fill_default()
         self.potses.fill_default()
 
