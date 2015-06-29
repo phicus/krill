@@ -70,6 +70,7 @@ from serviceextinfo import ServiceExtInfo, ServicesExtInfo
 from customer import Customer, Customers
 #from contract import Contract, Contracts
 from cpe import Cpe, Cpes
+from cpe_profile import CpeProfile, CpeProfiles
 from pots import Pots, Potses
 from trigger import Triggers
 from pack import Packs
@@ -749,6 +750,8 @@ class Config(Item):
 #           (Contract, Contracts, 'contracts', True),
         'cpe':
            (Cpe, Cpes, 'cpes', True),
+        'cpe_profile':
+           (CpeProfile, CpeProfiles, 'cpe_profiles', True),
         'pots':
            (Pots, Potses, 'potses', True),
     }
@@ -773,7 +776,7 @@ class Config(Item):
                            'resultmodulation', 'escalation', 'serviceescalation', 'hostescalation',
                            'discoveryrun', 'discoveryrule', 'businessimpactmodulation',
                            'hostextinfo', 'serviceextinfo', 
-                           'customer', 'cpe', 'pots'
+                           'customer', 'cpe', 'cpe_profile', 'pots'
                            ]
 
 
@@ -1260,7 +1263,7 @@ class Config(Item):
         self.pollers.linkify(self.realms, self.modules)
 
         #self.contracts.linkify(self.customers)
-        self.cpes.linkify(self.customers)
+        self.cpes.linkify(self.customers, self.cpe_profiles)
         self.potses.linkify(self.cpes)
 
         # Ok, now update all realms with backlinks of

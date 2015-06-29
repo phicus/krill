@@ -41,7 +41,7 @@ from shinken.objects.pollerlink import PollerLink, PollerLinks
 from shinken.objects.brokerlink import BrokerLink, BrokerLinks
 from shinken.objects.receiverlink import ReceiverLink, ReceiverLinks
 from shinken.objects.customer import Customer, Customers
-#from shinken.objects.contract import Contract, Contracts
+from shinken.objects.cpe_profile import CpeProfile, CpeProfiles
 from shinken.objects.cpe import Cpe, Cpes
 from shinken.objects.pots import Pots, Potses
 from shinken.util import safe_print
@@ -70,7 +70,8 @@ class Regenerator(object):
         self.brokers = BrokerLinks([])
         self.receivers = ReceiverLinks([])
         self.customers = Customers([])
-        #self.contracts = Contracts([])
+        self.customers = Customers([])
+        self.cpe_profiles = CpeProfiles([])
         self.cpes = Cpes([])
         self.potses = Potses([])
         # From now we only look for realms names
@@ -85,7 +86,7 @@ class Regenerator(object):
         self.inp_servicegroups = {}
         self.inp_contactgroups = {}
         self.inp_customers = {}
-        #self.inp_contracts = {}
+        self.inp_cpe_profiles = {}
         self.inp_cpes = {}
         self.inp_potses = {}
 
@@ -131,7 +132,7 @@ class Regenerator(object):
         self.timeperiods = c.timeperiods
         self.commands = c.commands
         self.customers = c.customers
-        #self.contracts = c.contracts
+        self.cpe_profiles = c.cpe_profiles
         self.cpes = c.cpes
         self.potses = c.potses
         # We also load the realm
@@ -150,7 +151,7 @@ class Regenerator(object):
                                      'initial_servicegroup_status', 'initial_contact_status',
                                      'initial_contactgroup_status', 'initial_timeperiod_status',
                                      'initial_command_status',
-                                     'initial_customer_status',
+                                     'initial_customer_status', 'initial_cpe_profile_status',
                                      'initial_cpe_status', 'initial_pots_status']
         # Ok you are wondering why we don't add initial_broks_done?
         # It's because the LiveSTatus modules need this part to do internal things.
@@ -199,7 +200,7 @@ class Regenerator(object):
             inp_services = self.inp_services[inst_id]
             inp_servicegroups = self.inp_servicegroups[inst_id]
             inp_customers = self.inp_customers[inst_id]
-            #inp_contracts = self.inp_contracts[inst_id]
+            inp_cpe_profiles = self.inp_cpe_profiles[inst_id]
             inp_cpes = self.inp_cpes[inst_id]
             inp_potses = self.inp_potses[inst_id]
         except Exception, exp:
@@ -375,8 +376,8 @@ class Regenerator(object):
         for customer in inp_customers:
             self.customers.add_item(customer)
 
-        #for contract in inp_contracts:
-        #    self.contracts.add_item(contract)
+        for cpe_profile in inp_cpe_profiles:
+            self.cpe_profiles.add_item(cpe_profile)
 
         for cpe in inp_cpes:
             self.cpes.add_item(cpe)
@@ -393,7 +394,7 @@ class Regenerator(object):
         del self.inp_services[inst_id]
         del self.inp_servicegroups[inst_id]
         del self.inp_customers[inst_id]
-        #del self.inp_contracts[inst_id]
+        del self.inp_cpe_profiles[inst_id]
         del self.inp_cpes[inst_id]
         del self.inp_potses[inst_id]
 
@@ -528,7 +529,7 @@ class Regenerator(object):
         self.inp_servicegroups[c_id] = Servicegroups([])
         self.inp_contactgroups[c_id] = Contactgroups([])
         self.inp_customers[c_id] = Customers([])
-        #self.inp_contracts[c_id] = Contracts([])
+        self.inp_cpe_profiles[c_id] = CpeProfiles([])
         self.inp_cpes[c_id] = Cpes([])
         self.inp_potses[c_id] = Potses([])
 
@@ -785,20 +786,20 @@ class Regenerator(object):
             self.customers.add_item(c)
 
 
-    # def manage_initial_contract_status_brok(self, b):
-    #     data = b.data
-    #     cid = data['id']
-    #     safe_print("TFLK Contract with data", data)
+    def manage_initial_cpe_profile_status_brok(self, b):
+        data = b.data
+        cid = data['id']
+        safe_print("TFLK cpe_profile with data", data)
 
-    #     c = self.contracts.find_by_id(cid)
-    #     if c:
-    #         safe_print("Already existing contract %s updating it" % cid)
-    #         self.update_element(c, data)
-    #     else:
-    #         safe_print("Creating a new contract")
-    #         c = Contract({})
-    #         self.update_element(c, data)
-    #         self.contracts.add_item(c)
+        c = self.cpe_profiles.find_by_id(cid)
+        if c:
+            safe_print("Already existing cpe_profile %s updating it" % cid)
+            self.update_element(c, data)
+        else:
+            safe_print("Creating a new cpe_profile")
+            c = CpeProfile({})
+            self.update_element(c, data)
+            self.cpe_profiles.add_item(c)
 
 
     def manage_initial_cpe_status_brok(self, b):

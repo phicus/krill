@@ -45,17 +45,27 @@ class Cpe(Item):
         return '<cpe#%d/>' % (self.id)
 
     def __str__(self):
-        return 'mac%s' % self.mac
+        if self.mac:
+            return 'mac%s' % self.mac
+        elif self.sn:
+            return 'sn%s' % self.sn
+        else:
+            return 'id%d' % self.id
+
 
 class Cpes(Items):
     name_property = 'id'
     inner_class = Cpe
 
-    def linkify(self, customers):
+    def linkify(self, customers, cpe_profiles):
         for cpe in self:
             customer = customers.items[cpe.customerid]
             cpe.customer = customer
             customer.add_cpe_link(cpe)
+
+            cpe_profile = cpe_profiles.items[cpe.profileid]
+            cpe.profile = cpe_profile
+            cpe_profile.add_cpe_link(cpe)
 
     def find_by_id(self, id):
         return self.items.get(id, None)
