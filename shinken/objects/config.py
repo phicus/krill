@@ -68,7 +68,6 @@ from discoveryrun import Discoveryrun, Discoveryruns
 from hostextinfo import HostExtInfo, HostsExtInfo
 from serviceextinfo import ServiceExtInfo, ServicesExtInfo
 from customer import Customer, Customers
-#from contract import Contract, Contracts
 from cpe import Cpe, Cpes
 from cpe_profile import CpeProfile, CpeProfiles
 from pots import Pots, Potses
@@ -2325,7 +2324,7 @@ class Config(Item):
             cur_conf.services = []  # will be fill after
             # The elements of the others conf will be tag here
             cur_conf.customers = self.customers
-            #cur_conf.contracts = self.contracts
+            cur_conf.cpe_profiles = self.cpe_profiles
             cur_conf.cpes = self.cpes
             cur_conf.potses = self.potses
             cur_conf.other_elements = {}
@@ -2444,7 +2443,7 @@ class Config(Item):
                          "schedulers",
                          "realms",
                          "customers",
-                         #"contracts",
+                         "cpe_profiles",
                          "cpes",
                          "potses",
                          ):
