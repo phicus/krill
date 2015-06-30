@@ -18,6 +18,8 @@ class Cpe(Item):
         'model': StringProp(fill_brok=['full_status']),
         'profileid': IntegerProp(fill_brok=['full_status']),
         'access': BoolProp(fill_brok=['full_status']),
+
+        'state': StringProp(default='PENDING', fill_brok=['full_status', 'check_result'], retention=True),
     })
 
     running_properties = Item.running_properties.copy()
@@ -37,6 +39,8 @@ class Cpe(Item):
         self.profileid = None
         self.access = None
         self.potses = []
+
+        self.state = 'PENDING'
         for key in params:
             if key in ['id', 'customerid', 'sn', 'mac', 'mtamac', 'model', 'profileid', 'access']:
                 setattr(self, key, self.properties[key].pythonize(params[key]))
@@ -51,6 +55,7 @@ class Cpe(Item):
             return 'sn%s' % self.sn
         else:
             return 'id%d' % self.id
+
 
 
 class Cpes(Items):
