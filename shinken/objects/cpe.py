@@ -4,6 +4,8 @@
 from shinken.objects.item import Item, Items
 from shinken.property import IntegerProp, BoolProp, StringProp, ListProp
 
+from shinken.log import logger
+
 class Cpe(Item):
     id = 1  # zero is always special in database, so we do not take risk here
     my_type = 'cpe'
@@ -19,7 +21,10 @@ class Cpe(Item):
         'profileid': IntegerProp(fill_brok=['full_status']),
         'access': BoolProp(fill_brok=['full_status']),
 
-        'state': StringProp(default='PENDING', fill_brok=['full_status', 'check_result'], retention=True),
+        'state': StringProp(default='PENDING', fill_brok=['full_status'], retention=True),
+        'comments': StringProp(default=[], fill_brok=['full_status'], retention=True),
+        'actions': StringProp(default=[]), # put here checks and notif raised
+        'broks': StringProp(default=[]), # and here broks raised
     })
 
     running_properties = Item.running_properties.copy()
@@ -56,6 +61,13 @@ class Cpe(Item):
         else:
             return 'id%d' % self.id
 
+    def set_state(self, state):
+        self.state = str(state)
+        #comment_type = 3 #1:host 2:service?
+        #c = Comment(self, persistent, author, comment, comment_type, 4, 0, False, 0)
+        #self.add_comment(c)
+        self.broks.append(self.get_update_status_brok())
+
 
 
 class Cpes(Items):
@@ -73,4 +85,4 @@ class Cpes(Items):
             cpe_profile.add_cpe_link(cpe)
 
     def find_by_id(self, id):
-        return self.items.get(id, None)
+        return self.items.get(int(id), None)

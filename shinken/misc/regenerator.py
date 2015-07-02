@@ -47,7 +47,6 @@ from shinken.objects.pots import Pots, Potses
 from shinken.util import safe_print
 from shinken.message import Message
 
-
 # Class for a Regenerator. It will get broks, and "regenerate" real objects
 # from them :)
 class Regenerator(object):
@@ -1083,6 +1082,16 @@ class Regenerator(object):
             self.update_element(s, data)
             # print "S:", s
         except Exception:
+            pass
+
+
+    def manage_update_cpe_status_brok(self, b):
+        data = b.data
+        cpe_id = data['id']
+        try:
+            cpe = self.cpes[cpe_id]
+            self.update_element(cpe, data)
+        except Exception, exc:
             pass
 
 

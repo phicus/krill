@@ -1475,6 +1475,12 @@ class Scheduler(object):
             # We take all, we can clear it
             elt.broks = []
 
+        for elt in self.cpes:
+            for b in elt.broks:
+                b.prepare()
+                self.add(b)
+            elt.broks = []
+
 
     # Raises checks for no fresh states for services and hosts
     def check_freshness(self):

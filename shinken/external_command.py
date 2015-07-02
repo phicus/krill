@@ -403,6 +403,9 @@ class ExternalCommandManager:
             {'global': False, 'args': ['host', 'host']},
         'ADD_SIMPLE_POLLER':
             {'global': True, 'internal': True, 'args': [None, None, None, None]},
+
+        'SET_CPE_STATUS':
+            {'global': False, 'args': ['cpe', 'author']},
     }
 
     def __init__(self, conf, mode):
@@ -418,6 +421,7 @@ class ExternalCommandManager:
             self.contactgroups = conf.contactgroups
             self.timeperiods = conf.timeperiods
             self.pipe_path = conf.command_file
+            self.cpes = conf.cpes
 
         self.fifo = None
         self.cmd_fragments = ''
@@ -499,6 +503,7 @@ class ExternalCommandManager:
         if self.mode == 'receiver':
             return
 
+        
         if r is not None:
             is_global = r['global']
             if not is_global:
@@ -550,6 +555,30 @@ class ExternalCommandManager:
             else:
                 logger.warning("Passive check result was received for host '%s', "
                                "but the host could not be found!", host_name)
+
+    def search_cpe_and_dispatch(self, cpe_id, command, extcmd):
+        cpe_found = False
+
+        # If we are a receiver, just look in the receiver
+        if self.mode == 'receiver':
+            logger.debug("TFLK-EC %s" % search_cpe_and_dispatch_receiver*100)
+        else:
+            for cfg in self.confs.values():
+                if cfg.cpes.find_by_id(cpe_id) is not None:
+                    logger.debug("TFLK-EC CPE %s found in a configuration", cpe_id)
+                    if cfg.is_assigned:
+                        cpe_found = True
+                        sched = cfg.assigned_to
+                        logger.debug("TFLK-EC Sending command to the scheduler %s", sched.get_name())
+                        # sched.run_external_command(command)
+                        sched.external_commands.append(command)
+                        break
+                    else:
+                        logger.warning("TFLK-EC Problem: a configuration is found, but is not assigned!")
+
+        if not cpe_found:
+            logger.warning("TFLK-EC the cpe %s could not be found!", cpe_id)
+
 
     # Takes a PROCESS_SERVICE_CHECK_RESULT
     #  external command line and returns an unknown_[type]_check_result brok
@@ -735,6 +764,14 @@ class ExternalCommandManager:
                             self.search_host_and_dispatch(tmp_host, command, extcmd)
                             return None
 
+                    elif type_searched == 'cpe':
+                        if self.mode == 'dispatcher' or self.mode == 'receiver':
+                            self.search_cpe_and_dispatch(val, command, extcmd)
+                            return None
+                        cpe = self.cpes.find_by_id(val)
+                        if cpe is not None:
+                            args.append(cpe)
+
                     i += 1
                 else:
                     in_service = False
@@ -764,6 +801,7 @@ class ExternalCommandManager:
         # safe_print('Finally got ARGS:', args)
         if len(args) == len(entry['args']):
             # safe_print("OK, we can call the command", c_name, "with", args)
+            logger.debug("TFLK-EC OK c_name:%s; args: %s" % (c_name, args))
             return {'global': False, 'c_name': c_name, 'args': args}
             # f = getattr(self, c_name)
             # apply(f, args)
@@ -2004,6 +2042,9 @@ class ExternalCommandManager:
         r.fill_potential_satellites_by_type('pollers')
         logger.debug("Poller %s added", poller_name)
         logger.debug("Potential %s", str(r.get_potential_satellites_by_type('poller')))
+
+    def SET_CPE_STATUS(self, cpe, state):
+        cpe.set_state(state)
 
 
 if __name__ == '__main__':
