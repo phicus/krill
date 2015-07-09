@@ -61,7 +61,6 @@ class Customer(Item):
     __str__ = __repr__
 
     def add_cpe_link(self, cpe):
-        logger.debug("TFLK add_cpe_link %s <- %s" % (self, cpe))
         self.cpes.append(cpe)
 
 class Customers(Items):

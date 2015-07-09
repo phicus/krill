@@ -12,6 +12,7 @@ class CpeProfile(Item):
     properties.update({
         'id': IntegerProp(fill_brok=['full_status']),
         'name': StringProp(fill_brok=['full_status']),
+        'tech': StringProp(fill_brok=['full_status']),
     })
 
     running_properties = Item.running_properties.copy()
@@ -24,7 +25,7 @@ class CpeProfile(Item):
         self.name = None
         self.cpes = []
         for key in params:
-            if key in ['id', 'name']:
+            if key in ['id', 'name', 'tech']:
                 setattr(self, key, self.properties[key].pythonize(params[key]))
 
     def __repr__(self):

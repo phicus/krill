@@ -21,10 +21,17 @@ class Cpe(Item):
         'profileid': IntegerProp(fill_brok=['full_status']),
         'access': BoolProp(fill_brok=['full_status']),
 
-        'state': StringProp(default='PENDING', fill_brok=['full_status'], retention=True),
+        'registration_host': StringProp(fill_brok=['full_status'], retention=True),
+        'registration_id': IntegerProp(default='?', fill_brok=['full_status'], retention=True),
+        'registration_state_id': IntegerProp(default=0, fill_brok=['full_status'], retention=True),
+        'registration_state': StringProp(default='PENDING', fill_brok=['full_status'], retention=True),
+        'registration_report': StringProp(default='{}', fill_brok=['full_status'], retention=True),
+
         'comments': StringProp(default=[], fill_brok=['full_status'], retention=True),
         'actions': StringProp(default=[]), # put here checks and notif raised
         'broks': StringProp(default=[]), # and here broks raised
+
+        'action_url': StringProp(default='', fill_brok=['full_status']),
     })
 
     running_properties = Item.running_properties.copy()
@@ -46,6 +53,17 @@ class Cpe(Item):
         self.potses = []
 
         self.state = 'PENDING'
+
+        self.action_url = 'http://www.google.es|http://www.google.com'
+        self.notes_url = ['http://www.elpais.com']
+        self.notes = ['note1', 'note2']
+        self.notifications_enabled = True
+        self.last_state_change = None
+        self.output = 'En un lugar de La Mancha'
+        self.last_chk = None
+        self.perf_data = 'kara'
+        self.downtimes = []
+
         for key in params:
             if key in ['id', 'customerid', 'sn', 'mac', 'mtamac', 'model', 'profileid', 'access']:
                 setattr(self, key, self.properties[key].pythonize(params[key]))
@@ -61,12 +79,29 @@ class Cpe(Item):
         else:
             return 'id%d' % self.id
 
-    def set_state(self, state):
-        self.state = str(state)
+    def set_registration_info(self, host_name, id, state_id, state, report):
+        self.registration_host = host_name
+        self.registration_id = id
+        self.registration_state_id = state_id
+        self.registration_state = state
+        self.registration_report = report
+
         #comment_type = 3 #1:host 2:service?
         #c = Comment(self, persistent, author, comment, comment_type, 4, 0, False, 0)
         #self.add_comment(c)
         self.broks.append(self.get_update_status_brok())
+
+    def get_full_str(self):
+        full_name = str(self)
+        for pots in self.potses:
+            if pots.cli:
+                full_name += " " + pots.cli
+        return full_name
+
+    get_full_name = get_full_str
+
+    def get_host_tags(self):
+        return ['gpon']
 
 
 

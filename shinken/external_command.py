@@ -404,8 +404,8 @@ class ExternalCommandManager:
         'ADD_SIMPLE_POLLER':
             {'global': True, 'internal': True, 'args': [None, None, None, None]},
 
-        'SET_CPE_STATUS':
-            {'global': False, 'args': ['cpe', 'author']},
+        'SET_CPE_REGISTRATION_INFO':
+            {'global': False, 'args': ['cpe', 'host', None, 'to_int', None, None]},
     }
 
     def __init__(self, conf, mode):
@@ -2043,8 +2043,8 @@ class ExternalCommandManager:
         logger.debug("Poller %s added", poller_name)
         logger.debug("Potential %s", str(r.get_potential_satellites_by_type('poller')))
 
-    def SET_CPE_STATUS(self, cpe, state):
-        cpe.set_state(state)
+    def SET_CPE_REGISTRATION_INFO(self, cpe, host, reg_id, state_id, state, report):
+        cpe.set_registration_info(host.host_name, reg_id, state_id, state, report)
 
 
 if __name__ == '__main__':
