@@ -2043,8 +2043,8 @@ class ExternalCommandManager:
         logger.debug("Poller %s added", poller_name)
         logger.debug("Potential %s", str(r.get_potential_satellites_by_type('poller')))
 
-    def SET_CPE_REGISTRATION_INFO(self, cpe, host, reg_id, state_id, state, report):
-        cpe.set_registration_info(host.host_name, reg_id, state_id, state, report)
+    def SET_CPE_REGISTRATION_INFO(self, cpe, host, reg_id, state_id, state, perf_data):
+        cpe.set_registration_info(host.host_name, reg_id, state_id, state, perf_data)
 
 
 if __name__ == '__main__':
