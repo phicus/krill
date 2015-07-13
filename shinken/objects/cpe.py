@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from shinken.objects.item import Item, Items
-from shinken.property import IntegerProp, BoolProp, StringProp, ListProp
+from shinken.property import IntegerProp, BoolProp, StringProp, ListProp, FloatProp
 
 from shinken.log import logger
 
@@ -21,27 +21,41 @@ class Cpe(Item):
         'profileid': IntegerProp(fill_brok=['full_status']),
         'access': BoolProp(fill_brok=['full_status']),
 
+        'customer': StringProp(default=None, fill_brok=['full_status']),
+        'profile': StringProp(default=None, fill_brok=['full_status']),
+        'potses': ListProp(default=[], fill_brok=['full_status']),
+
+        'action_url': StringProp(default='', fill_brok=['full_status']),
+        'notes_url': StringProp(default=['http://www.elpais.com'], fill_brok=['full_status']),
+        'notes': StringProp(default='notes??', fill_brok=['full_status']),
+        'notifications_enabled': BoolProp(default=True, fill_brok=['full_status'], retention=True),
+        'last_state_change': FloatProp(default=0.0, fill_brok=['full_status', 'check_result'], retention=True),
+        'check_command': StringProp(default='_internal_host_up', fill_brok=['full_status']),
+    })
+
+    running_properties = Item.running_properties.copy()
+    running_properties.update({
+        'state': StringProp(default='unknown', fill_brok=['full_status']),
+        'output': StringProp(default='en un lugar...', fill_brok=['full_status']),
+
+        'customs': StringProp(default={}, fill_brok=['full_status']),
+
         'registration_host': StringProp(fill_brok=['full_status'], retention=True),
         'registration_id': IntegerProp(default='?', fill_brok=['full_status'], retention=True),
         'registration_state_id': IntegerProp(default=0, fill_brok=['full_status'], retention=True),
         'registration_state': StringProp(default='PENDING', fill_brok=['full_status'], retention=True),
         'perf_data': StringProp(default='{}', fill_brok=['full_status'], retention=True),
 
+        'latency': FloatProp(default=0, fill_brok=['full_status'], retention=True),
+
         'comments': StringProp(default=[], fill_brok=['full_status'], retention=True),
         'actions': StringProp(default=[]), # put here checks and notif raised
         'broks': StringProp(default=[]), # and here broks raised
-
-        'action_url': StringProp(default='', fill_brok=['full_status']),
+        'last_chk': IntegerProp(default=0, fill_brok=['full_status'], retention=True),
+        'downtimes': StringProp(default=[], fill_brok=['full_status'], retention=True),
     })
 
-    running_properties = Item.running_properties.copy()
-    running_properties.update({
-        'customer': StringProp(default=None, fill_brok=['full_status']),
-        'profile': StringProp(default=None, fill_brok=['full_status']),
-        'potses': ListProp(fill_brok=['full_status'], default=None),
-    })
-
-    def __init__(self, params={}):
+    def ___init__(self, params={}):
         self.id = None
         self.customerid = None
         self.sn = None
@@ -102,6 +116,15 @@ class Cpe(Item):
 
     def get_host_tags(self):
         return ['gpon']
+
+    def __fill_default(self):
+        """ Fill missing properties if they are missing """
+        cls = self.__class__
+
+        for prop, entry in cls.properties.items():
+            print 'TFLK', prop, entry
+            if not hasattr(self, prop) and entry.has_default:
+                setattr(self, prop, entry.default)
 
 
 
