@@ -38,7 +38,7 @@ class Customer(Item):
         self.cpes = []
         for key in params:
             if key in ['id', 'name', 'surname', 'comment', 'created', 'updated']:
-                safe_print("TFLK Customer %s -> %s" % (key, self.properties[key].pythonize(params[key])))
+                #safe_print("TFLK Customer %s -> %s" % (key, self.properties[key].pythonize(params[key])))
                 setattr(self, key, self.properties[key].pythonize(params[key]))
             elif key == 'cpes':
                 self.cpes = params[key]
@@ -68,5 +68,5 @@ class Customers(Items):
     inner_class = Customer
 
     def find_by_id(self, id):
-        logger.debug("TFLK %s", self.items)
+        #logger.debug("TFLK %s", self.items)
         return self.items.get(id, None)
