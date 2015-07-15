@@ -117,16 +117,6 @@ class Cpe(Item):
     def get_host_tags(self):
         return ['gpon']
 
-    def __fill_default(self):
-        """ Fill missing properties if they are missing """
-        cls = self.__class__
-
-        for prop, entry in cls.properties.items():
-            print 'TFLK', prop, entry
-            if not hasattr(self, prop) and entry.has_default:
-                setattr(self, prop, entry.default)
-
-
 
 class Cpes(Items):
     name_property = 'id'

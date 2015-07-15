@@ -180,7 +180,6 @@ class Scheduler(object):
         self.triggers.load_objects(self)
 
         
-        logger.debug("TFLK conf %s" % conf.__class__)
         self.customers = conf.customers
         self.cpe_profiles = conf.cpe_profiles
         self.cpes = conf.cpes
@@ -624,8 +623,6 @@ class Scheduler(object):
                           ):
         res = []
         now = time.time()
-
-        logger.debug("TFLK get_to_run_checks do_checks=%s, do_actions=%s worker_name=%s, module_types=%s" % (do_checks, do_actions, worker_name, module_types))
 
         # If poller want to do checks
         if do_checks:

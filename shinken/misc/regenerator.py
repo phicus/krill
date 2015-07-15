@@ -770,7 +770,6 @@ class Regenerator(object):
     def manage_initial_customer_status_brok(self, b):
         data = b.data
         cid = data['id']
-        safe_print("TFLK Customer with data", data)
 
         c = self.customers.find_by_id(cid)
         if c:
@@ -787,7 +786,6 @@ class Regenerator(object):
     def manage_initial_cpe_profile_status_brok(self, b):
         data = b.data
         cid = data['id']
-        safe_print("TFLK cpe_profile with data", data)
 
         c = self.cpe_profiles.find_by_id(cid)
         if c:
@@ -803,7 +801,6 @@ class Regenerator(object):
     def manage_initial_cpe_status_brok(self, b):
         data = b.data
         cid = data['id']
-        safe_print("TFLK CPE with data", data)
 
         c = self.cpes.find_by_id(cid)
         if c:
@@ -819,7 +816,6 @@ class Regenerator(object):
     def manage_initial_pots_status_brok(self, b):
         data = b.data
         cid = data['id']
-        safe_print("TFLK POTS with data", data)
 
         c = self.potses.find_by_id(cid)
         if c:
