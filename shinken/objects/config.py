@@ -68,8 +68,9 @@ from discoveryrun import Discoveryrun, Discoveryruns
 from hostextinfo import HostExtInfo, HostsExtInfo
 from serviceextinfo import ServiceExtInfo, ServicesExtInfo
 from customer import Customer, Customers
-from cpe import Cpe, Cpes
 from cpeprofile import CpeProfile, CpeProfiles
+from cpemodel import CpeModel, CpeModels
+from cpe import Cpe, Cpes
 from pots import Pots, Potses
 from trigger import Triggers
 from pack import Packs
@@ -745,10 +746,12 @@ class Config(Item):
             (ServiceExtInfo, ServicesExtInfo, 'servicesextinfo', True),
         'customer':
            (Customer, Customers, 'customers', True),
-        'cpe':
-           (Cpe, Cpes, 'cpes', True),
         'cpeprofile':
            (CpeProfile, CpeProfiles, 'cpeprofiles', True),
+        'cpemodel':
+           (CpeModel, CpeModels, 'cpemodels', True),
+        'cpe':
+           (Cpe, Cpes, 'cpes', True),
         'pots':
            (Pots, Potses, 'potses', True),
     }
@@ -773,7 +776,7 @@ class Config(Item):
                            'resultmodulation', 'escalation', 'serviceescalation', 'hostescalation',
                            'discoveryrun', 'discoveryrule', 'businessimpactmodulation',
                            'hostextinfo', 'serviceextinfo', 
-                           'customer', 'cpe', 'cpeprofile', 'pots'
+                           'customer', 'cpeprofile', 'cpemodel', 'cpe', 'pots'
                            ]
 
 
@@ -1259,7 +1262,7 @@ class Config(Item):
         self.reactionners.linkify(self.realms, self.modules)
         self.pollers.linkify(self.realms, self.modules)
 
-        self.cpes.linkify(self.customers, self.cpeprofiles)
+        self.cpes.linkify(self.customers, self.cpeprofiles, self.cpemodels)
         self.potses.linkify(self.cpes)
 
         # Ok, now update all realms with backlinks of
@@ -1559,6 +1562,7 @@ class Config(Item):
 
         self.customers.fill_default()
         self.cpeprofiles.fill_default()
+        self.cpemodels.fill_default()
         self.cpes.fill_default()
         self.potses.fill_default()
 
@@ -2325,6 +2329,7 @@ class Config(Item):
             # The elements of the others conf will be tag here
             cur_conf.customers = self.customers
             cur_conf.cpeprofiles = self.cpeprofiles
+            cur_conf.cpemodels = self.cpemodels
             cur_conf.cpes = self.cpes
             cur_conf.potses = self.potses
             cur_conf.other_elements = {}
@@ -2444,6 +2449,7 @@ class Config(Item):
                          "realms",
                          "customers",
                          "cpeprofiles",
+                         "cpemodels",
                          "cpes",
                          "potses",
                          ):

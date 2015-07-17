@@ -182,6 +182,7 @@ class Scheduler(object):
         
         self.customers = conf.customers
         self.cpeprofiles = conf.cpeprofiles
+        self.cpemodels = conf.cpemodels
         self.cpes = conf.cpes
         self.potses = conf.potses
 
@@ -1225,7 +1226,7 @@ class Scheduler(object):
                                 self.contacts, self.contactgroups,
                                 self.hosts, self.hostgroups,
                                 self.services, self.servicegroups,
-                                self.customers, self.cpeprofiles, self.cpes, self.potses)
+                                self.customers, self.cpeprofiles, self.cpemodels, self.cpes, self.potses)
 
         self.conf.skip_initial_broks = getattr(self.conf, 'skip_initial_broks', False)
         logger.debug("Skipping initial broks? %s", str(self.conf.skip_initial_broks))
