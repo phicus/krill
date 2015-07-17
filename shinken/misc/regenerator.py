@@ -87,6 +87,7 @@ class Regenerator(object):
         self.inp_contactgroups = {}
         self.inp_customers = {}
         self.inp_cpeprofiles = {}
+        self.inp_cpemodels = {}
         self.inp_cpes = {}
         self.inp_potses = {}
 
@@ -133,6 +134,7 @@ class Regenerator(object):
         self.commands = c.commands
         self.customers = c.customers
         self.cpeprofiles = c.cpeprofiles
+        self.cpemodels = c.cpemodels
         self.cpes = c.cpes
         self.potses = c.potses
         # We also load the realm
@@ -151,7 +153,7 @@ class Regenerator(object):
                                      'initial_servicegroup_status', 'initial_contact_status',
                                      'initial_contactgroup_status', 'initial_timeperiod_status',
                                      'initial_command_status',
-                                     'initial_customer_status', 'initial_cpeprofile_status',
+                                     'initial_customer_status', 'initial_cpeprofile_status', 'initial_cpemodel_status',
                                      'initial_cpe_status', 'initial_pots_status']
         # Ok you are wondering why we don't add initial_broks_done?
         # It's because the LiveSTatus modules need this part to do internal things.
@@ -201,6 +203,7 @@ class Regenerator(object):
             inp_servicegroups = self.inp_servicegroups[inst_id]
             inp_customers = self.inp_customers[inst_id]
             inp_cpeprofiles = self.inp_cpeprofiles[inst_id]
+            inp_cpemodels = self.inp_cpemodels[inst_id]
             inp_cpes = self.inp_cpes[inst_id]
             inp_potses = self.inp_potses[inst_id]
         except Exception, exp:
@@ -379,6 +382,9 @@ class Regenerator(object):
         for cpeprofile in inp_cpeprofiles:
             self.cpeprofiles.add_item(cpeprofile)
 
+        for cpemodel in inp_cpemodels:
+            self.cpemodels.add_item(cpemodel)
+
         for cpe in inp_cpes:
             self.cpes.add_item(cpe)
 
@@ -395,6 +401,7 @@ class Regenerator(object):
         del self.inp_servicegroups[inst_id]
         del self.inp_customers[inst_id]
         del self.inp_cpeprofiles[inst_id]
+        del self.inp_cpemodels[inst_id]
         del self.inp_cpes[inst_id]
         del self.inp_potses[inst_id]
 
@@ -530,6 +537,7 @@ class Regenerator(object):
         self.inp_contactgroups[c_id] = Contactgroups([])
         self.inp_customers[c_id] = Customers([])
         self.inp_cpeprofiles[c_id] = CpeProfiles([])
+        self.inp_cpemodels[c_id] = CpeModels([])
         self.inp_cpes[c_id] = Cpes([])
         self.inp_potses[c_id] = Potses([])
 
@@ -798,6 +806,21 @@ class Regenerator(object):
             c = CpeProfile({})
             self.update_element(c, data)
             self.cpeprofiles.add_item(c)
+
+
+    def manage_initial_cpemodel_status_brok(self, b):
+        data = b.data
+        cid = data['id']
+
+        c = self.cpemodels.find_by_id(cid)
+        if c:
+            safe_print("Already existing cpemodel %s updating it" % cid)
+            self.update_element(c, data)
+        else:
+            safe_print("Creating a new cpemodel")
+            c = CpeModel({})
+            self.update_element(c, data)
+            self.cpemodels.add_item(c)
 
 
     def manage_initial_cpe_status_brok(self, b):
