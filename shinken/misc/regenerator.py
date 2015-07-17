@@ -42,6 +42,7 @@ from shinken.objects.brokerlink import BrokerLink, BrokerLinks
 from shinken.objects.receiverlink import ReceiverLink, ReceiverLinks
 from shinken.objects.customer import Customer, Customers
 from shinken.objects.cpeprofile import CpeProfile, CpeProfiles
+from shinken.objects.cpemodel import CpeModel, CpeModels
 from shinken.objects.cpe import Cpe, Cpes
 from shinken.objects.pots import Pots, Potses
 from shinken.util import safe_print
