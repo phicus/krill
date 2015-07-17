@@ -69,7 +69,7 @@ from hostextinfo import HostExtInfo, HostsExtInfo
 from serviceextinfo import ServiceExtInfo, ServicesExtInfo
 from customer import Customer, Customers
 from cpe import Cpe, Cpes
-from cpe_profile import CpeProfile, CpeProfiles
+from cpeprofile import CpeProfile, CpeProfiles
 from pots import Pots, Potses
 from trigger import Triggers
 from pack import Packs
@@ -747,8 +747,8 @@ class Config(Item):
            (Customer, Customers, 'customers', True),
         'cpe':
            (Cpe, Cpes, 'cpes', True),
-        'cpe_profile':
-           (CpeProfile, CpeProfiles, 'cpe_profiles', True),
+        'cpeprofile':
+           (CpeProfile, CpeProfiles, 'cpeprofiles', True),
         'pots':
            (Pots, Potses, 'potses', True),
     }
@@ -773,7 +773,7 @@ class Config(Item):
                            'resultmodulation', 'escalation', 'serviceescalation', 'hostescalation',
                            'discoveryrun', 'discoveryrule', 'businessimpactmodulation',
                            'hostextinfo', 'serviceextinfo', 
-                           'customer', 'cpe', 'cpe_profile', 'pots'
+                           'customer', 'cpe', 'cpeprofile', 'pots'
                            ]
 
 
@@ -1259,7 +1259,7 @@ class Config(Item):
         self.reactionners.linkify(self.realms, self.modules)
         self.pollers.linkify(self.realms, self.modules)
 
-        self.cpes.linkify(self.customers, self.cpe_profiles)
+        self.cpes.linkify(self.customers, self.cpeprofiles)
         self.potses.linkify(self.cpes)
 
         # Ok, now update all realms with backlinks of
@@ -1558,7 +1558,7 @@ class Config(Item):
         self.servicesextinfo.fill_default()
 
         self.customers.fill_default()
-        self.cpe_profiles.fill_default()
+        self.cpeprofiles.fill_default()
         self.cpes.fill_default()
         self.potses.fill_default()
 
@@ -2324,7 +2324,7 @@ class Config(Item):
             cur_conf.services = []  # will be fill after
             # The elements of the others conf will be tag here
             cur_conf.customers = self.customers
-            cur_conf.cpe_profiles = self.cpe_profiles
+            cur_conf.cpeprofiles = self.cpeprofiles
             cur_conf.cpes = self.cpes
             cur_conf.potses = self.potses
             cur_conf.other_elements = {}
@@ -2443,7 +2443,7 @@ class Config(Item):
                          "schedulers",
                          "realms",
                          "customers",
-                         "cpe_profiles",
+                         "cpeprofiles",
                          "cpes",
                          "potses",
                          ):

@@ -122,15 +122,15 @@ class Cpes(Items):
     name_property = 'id'
     inner_class = Cpe
 
-    def linkify(self, customers, cpe_profiles):
+    def linkify(self, customers, cpeprofiles):
         for cpe in self:
             customer = customers.items[cpe.customerid]
             cpe.customer = customer
             customer.add_cpe_link(cpe)
 
-            cpe_profile = cpe_profiles.items[cpe.profileid]
-            cpe.profile = cpe_profile
-            cpe_profile.add_cpe_link(cpe)
+            cpeprofile = cpeprofiles.items[cpe.profileid]
+            cpe.profile = cpeprofile
+            cpeprofile.add_cpe_link(cpe)
 
     def find_by_id(self, id):
         return self.items.get(int(id), None)

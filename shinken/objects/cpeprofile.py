@@ -6,13 +6,15 @@ from shinken.property import IntegerProp, BoolProp, StringProp, ListProp
 
 class CpeProfile(Item):
     id = 1  # zero is always special in database, so we do not take risk here
-    my_type = 'cpe_profile'
+    my_type = 'cpeprofile'
 
     properties = Item.properties.copy()
     properties.update({
         'id': IntegerProp(fill_brok=['full_status']),
         'name': StringProp(fill_brok=['full_status']),
         'tech': StringProp(fill_brok=['full_status']),
+        'downstream': StringProp(fill_brok=['full_status']),
+        'upstream': StringProp(fill_brok=['full_status']),
     })
 
     running_properties = Item.running_properties.copy()
@@ -20,16 +22,8 @@ class CpeProfile(Item):
         'cpes': StringProp(default=[], fill_brok=['full_status']),
     })
 
-    def __init__(self, params={}):
-        self.id = None
-        self.name = None
-        self.cpes = []
-        for key in params:
-            if key in ['id', 'name', 'tech']:
-                setattr(self, key, self.properties[key].pythonize(params[key]))
-
     def __repr__(self):
-        return '<cpe_profile#%d/>' % (self.id)
+        return '<cpeprofile#%d/>' % (self.id)
 
     def __str__(self):
         return self.name
