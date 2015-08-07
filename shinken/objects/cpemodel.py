@@ -31,6 +31,10 @@ class CpeModel(Item):
     def add_cpe_link(self, cpe):
         self.cpes.append(cpe)
 
+    @property
+    def type(self):
+        return 'router' if self.is_router else 'bridge'
+
 
 class CpeModels(Items):
     name_property = 'id'
