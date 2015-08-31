@@ -23,7 +23,7 @@ class CpeModel(Item):
     })
 
     def __repr__(self):
-        return '<cpemodel#%d/>' % (self.id)
+        return '<cpemodel#%s/>' % self.id
 
     def __str__(self):
         return self.id
