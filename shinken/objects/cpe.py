@@ -14,15 +14,18 @@ class Cpe(Item):
     properties.update({
         'id': IntegerProp(fill_brok=['full_status']),
         'customerid': IntegerProp(fill_brok=['full_status']),
-        'sn': StringProp(fill_brok=['full_status']),
-        'mac': StringProp(fill_brok=['full_status']),
-        'mtamac': StringProp(fill_brok=['full_status']),
-        'model': StringProp(fill_brok=['full_status']),
-        'profileid': IntegerProp(fill_brok=['full_status']),
-        'access': BoolProp(fill_brok=['full_status']),
+        'sn': StringProp(fill_brok=['full_status'], default=''),
+        'dsn': StringProp(fill_brok=['full_status'], default=''),
+        'mac': StringProp(fill_brok=['full_status'], default=''),
+        'mtamac': StringProp(fill_brok=['full_status'], default=''),
+        'modelid': StringProp(fill_brok=['full_status'], default=''),
+        'tech': StringProp(fill_brok=['full_status'], default='docsis'),
+        'profileid': IntegerProp(fill_brok=['full_status'], default=None),
+        'access': BoolProp(fill_brok=['full_status'], default=True),
 
-        'customer': StringProp(default=None, fill_brok=['full_status']),
-        'profile': StringProp(default=None, fill_brok=['full_status']),
+        'customer': StringProp(fill_brok=['full_status'], default=None),
+        'profile': StringProp(fill_brok=['full_status'], default=None),
+        'model': StringProp(fill_brok=['full_status'], default=None),
         'potses': ListProp(default=[], fill_brok=['full_status']),
 
         'action_url': StringProp(default='', fill_brok=['full_status']),
@@ -36,7 +39,7 @@ class Cpe(Item):
     running_properties = Item.running_properties.copy()
     running_properties.update({
         'state': StringProp(default='unknown', fill_brok=['full_status']),
-        'output': StringProp(default='en un lugar...', fill_brok=['full_status']),
+        'output': StringProp(default='en un lugar de la Mancha...', fill_brok=['full_status']),
 
         'customs': StringProp(default={}, fill_brok=['full_status']),
 
@@ -128,13 +131,27 @@ class Cpes(Items):
             cpe.customer = customer
             customer.add_cpe_link(cpe)
 
-            cpeprofile = cpeprofiles.items[cpe.profileid]
-            cpe.profile = cpeprofile
-            cpeprofile.add_cpe_link(cpe)
+            if cpe.profileid:
+                cpeprofile = cpeprofiles.items[cpe.profileid]
+                cpe.profile = cpeprofile
+                cpeprofile.add_cpe_link(cpe)
 
-            cpemodel = cpemodels.items[cpe.model]
+            cpemodel = cpemodels.items[cpe.modelid]
             cpe.model = cpemodel
             cpemodel.add_cpe_link(cpe)
 
     def find_by_id(self, id):
         return self.items.get(int(id), None)
+
+    def find_by_sn(self, sn):
+        filter_by_sn = [cpe for cpe in self if cpe.sn == sn]
+        if filter_by_sn:
+            return filter_by_sn[0]
+        filter_by_dsn = [cpe for cpe in self if cpe.dsn == sn]
+        if filter_by_dsn:
+            return filter_by_dsn[0]
+
+    def find_by_mac(self, mac):
+        filter_by_mac = [cpe for cpe in self if cpe.mac == mac]
+        if filter_by_mac:
+            return filter_by_mac[0]
