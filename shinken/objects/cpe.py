@@ -144,14 +144,15 @@ class Cpes(Items):
         return self.items.get(int(id), None)
 
     def find_by_sn(self, sn):
-        filter_by_sn = [cpe for cpe in self if cpe.sn == sn]
+        filter_by_sn = [cpe for cpe in self if cpe.sn and cpe.sn.lower() == sn.lower()]
         if filter_by_sn:
             return filter_by_sn[0]
-        filter_by_dsn = [cpe for cpe in self if cpe.dsn == sn]
+
+        filter_by_dsn = [cpe for cpe in self if cpe.dsn and cpe.dsn.lower() == sn.lower()]
         if filter_by_dsn:
             return filter_by_dsn[0]
 
     def find_by_mac(self, mac):
-        filter_by_mac = [cpe for cpe in self if cpe.mac == mac]
+        filter_by_mac = [cpe for cpe in self if cpe.mac.lower() == mac.lower()]
         if filter_by_mac:
             return filter_by_mac[0]
