@@ -16,6 +16,8 @@ class Pots(Item):
         'cli': StringProp(fill_brok=['full_status']),
         'contextid': IntegerProp(fill_brok=['full_status']),
         'contextname': StringProp(fill_brok=['full_status']),
+        'username': StringProp(fill_brok=['full_status'], default=None),
+        'password': StringProp(fill_brok=['full_status'], default=None),
     })
 
     running_properties = Item.running_properties.copy()
