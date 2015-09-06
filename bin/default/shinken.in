@@ -133,4 +133,4 @@ NICENESS=5
 #SHINKENGROUP=shinken
 #HOME=`grep ^$SHINKENUSER: /etc/passwd | cut -d: -f 6`
 
-DEBUG=1
+#DEBUG=1
