@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2009-2014:
@@ -29,6 +27,7 @@ import copy
 import sys
 import os
 import json
+
 try:
     from ClusterShell.NodeSet import NodeSet, NodeSetParseRangeError
 except ImportError:
@@ -43,6 +42,8 @@ try:
 except Exception, exp:
     logger.error('Encoding detection error= %s', exp)
     safe_stdout = False
+
+
 
 
 # ########## Strings #############
@@ -803,9 +804,9 @@ def filter_service_by_regex_name(regex):
 def filter_service_by_host_name(host_name):
 
     def inner_filter(service):
-        if service is None or service.host is None:
+        if service is None:
             return False
-        return service.host.host_name == host_name
+        return service.host_name == host_name
 
     return inner_filter
 
@@ -814,9 +815,9 @@ def filter_service_by_regex_host_name(regex):
     host_re = re.compile(regex)
 
     def inner_filter(service):
-        if service is None or service.host is None:
+        if service is None:
             return False
-        return host_re.match(service.host.host_name) is not None
+        return host_re.match(service.host_name) is not None
 
     return inner_filter
 
@@ -885,3 +886,13 @@ def is_complex_expr(expr):
         if m in expr:
             return True
     return False
+
+
+def get_exclude_match_expr(pattern):
+    if pattern == "*":
+        return lambda d: True
+    elif pattern.startswith("r:"):
+        reg = re.compile(pattern[2:])
+        return reg.match
+    else:
+        return lambda d: d == pattern
