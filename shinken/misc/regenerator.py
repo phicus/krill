@@ -1106,12 +1106,22 @@ class Regenerator(object):
             pass
 
 
+    def manage_update_customer_status_brok(self, b):
+        data = b.data
+        xid = data['id']
+        try:
+            x = self.customers[xid]
+            self.update_element(x, data)
+        except Exception, exc:
+            pass
+
+
     def manage_update_cpe_status_brok(self, b):
         data = b.data
-        cpe_id = data['id']
+        xid = data['id']
         try:
-            cpe = self.cpes[cpe_id]
-            self.update_element(cpe, data)
+            x = self.cpes[xid]
+            self.update_element(x, data)
         except Exception, exc:
             pass
 
