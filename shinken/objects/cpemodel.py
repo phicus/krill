@@ -16,7 +16,7 @@ class CpeModel(Item):
         'pots': IntegerProp(fill_brok=['full_status'], default=0),
         'is_router': BoolProp(fill_brok=['full_status'], default=False),
         'tr069': BoolProp(fill_brok=['full_status'], default=False),
-    )
+    })
 
     running_properties = Item.running_properties.copy()
     running_properties.update({
