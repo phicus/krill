@@ -8,3 +8,5 @@ now=$(date +%s)
 commandfile='/var/lib/shinken/nagios.cmd'
 
 printf "[%lu] SET_CPE_REGISTRATION_INFO;2;olt;3:7;1;{'up': 456}" $now > $commandfile
+
+printf "[%lu] PROCESS_HOST_CHECK_RESULT;cpe10;0;demo" $now > $commandfile
