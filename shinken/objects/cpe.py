@@ -136,9 +136,10 @@ class Cpes(Items):
                 cpe.profile = cpeprofile
                 cpeprofile.add_cpe_link(cpe)
 
-            cpemodel = cpemodels.items[cpe.modelid]
-            cpe.model = cpemodel
-            cpemodel.add_cpe_link(cpe)
+            cpemodel = cpemodels.items.get(cpe.modelid)
+            if cpemodel:
+                cpe.model = cpemodel
+                cpemodel.add_cpe_link(cpe)
 
     def find_by_id(self, id):
         return self.items.get(int(id), None)
