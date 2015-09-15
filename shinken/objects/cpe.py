@@ -22,6 +22,12 @@ class Cpe(Item):
         'tech': StringProp(fill_brok=['full_status'], default='docsis'),
         'profileid': IntegerProp(fill_brok=['full_status'], default=None),
         'access': BoolProp(fill_brok=['full_status'], default=True),
+        'tech': StringProp(fill_brok=['full_status'], default='docsis'),
+        'notes': StringProp(fill_brok=['full_status'], default='notes??'),
+        'external_voip': BoolProp(fill_brok=['full_status'], default=False),
+        'probe': BoolProp(fill_brok=['full_status'], default=False),
+        'enable_notifications': BoolProp(fill_brok=['full_status'], default=False),
+        'topology': StringProp(fill_brok=['full_status'], default=''),
 
         'customer': StringProp(fill_brok=['full_status'], default=None),
         'profile': StringProp(fill_brok=['full_status'], default=None),
@@ -30,7 +36,6 @@ class Cpe(Item):
 
         'action_url': StringProp(default='', fill_brok=['full_status']),
         'notes_url': StringProp(default=['http://www.elpais.com'], fill_brok=['full_status']),
-        'notes': StringProp(default='notes??', fill_brok=['full_status']),
         'notifications_enabled': BoolProp(default=True, fill_brok=['full_status'], retention=True),
         'last_state_change': FloatProp(default=0.0, fill_brok=['full_status', 'check_result'], retention=True),
         'check_command': StringProp(default='_internal_host_up', fill_brok=['full_status']),
