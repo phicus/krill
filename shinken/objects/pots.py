@@ -14,7 +14,7 @@ class Pots(Item):
         'cpeid': IntegerProp(fill_brok=['full_status']),
         'order': IntegerProp(fill_brok=['full_status']),
         'cli': StringProp(fill_brok=['full_status']),
-        'contextid': IntegerProp(fill_brok=['full_status']),
+        #'contextid': IntegerProp(fill_brok=['full_status'], default=None),
         'contextname': StringProp(fill_brok=['full_status']),
         'username': StringProp(fill_brok=['full_status'], default=None),
         'password': StringProp(fill_brok=['full_status'], default=None),
