@@ -32,7 +32,6 @@ class Cpe(Item):
         'customer': StringProp(fill_brok=['full_status'], default=None),
         'profile': StringProp(fill_brok=['full_status'], default=None),
         'model': StringProp(fill_brok=['full_status'], default=None),
-        'potses': ListProp(default=[], fill_brok=['full_status']),
 
         'action_url': StringProp(default='', fill_brok=['full_status']),
         'notes_url': StringProp(default=['http://www.elpais.com'], fill_brok=['full_status']),
@@ -46,7 +45,8 @@ class Cpe(Item):
         'state': StringProp(default='unknown', fill_brok=['full_status']),
         'output': StringProp(default='en un lugar de la Mancha...', fill_brok=['full_status']),
 
-        'customs': StringProp(default={}, fill_brok=['full_status']),
+        #'customs': StringProp(default={}, fill_brok=['full_status']),
+        'potses': ListProp(default=[], fill_brok=['full_status']),
 
         'registration_host': StringProp(fill_brok=['full_status'], retention=True),
         'registration_id': IntegerProp(default='?', fill_brok=['full_status'], retention=True),
@@ -63,35 +63,10 @@ class Cpe(Item):
         'downtimes': StringProp(default=[], fill_brok=['full_status'], retention=True),
     })
 
-    def ___init__(self, params={}):
-        self.id = None
-        self.customerid = None
-        self.sn = None
-        self.mac = None
-        self.mtamac = None
-        self.model = None
-        self.profileid = None
-        self.access = None
-        self.potses = []
-
-        self.state = 'PENDING'
-
-        self.action_url = 'http://www.google.es|http://www.google.com'
-        self.notes_url = ['http://www.elpais.com']
-        self.notes = ['note1', 'note2']
-        self.notifications_enabled = True
-        self.last_state_change = None
-        self.output = 'En un lugar de La Mancha'
-        self.last_chk = None
-        self.perf_data = 'kara'
-        self.downtimes = []
-
-        for key in params:
-            if key in ['id', 'customerid', 'sn', 'mac', 'mtamac', 'model', 'profileid', 'access']:
-                setattr(self, key, self.properties[key].pythonize(params[key]))
 
     def __repr__(self):
         return '<cpe#%d/>' % (self.id)
+
 
     def __str__(self):
         if self.mac:
