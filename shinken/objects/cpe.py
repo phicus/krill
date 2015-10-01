@@ -48,10 +48,10 @@ class Cpe(Item):
         #'customs': StringProp(default={}, fill_brok=['full_status']),
         'potses': ListProp(default=[], fill_brok=['full_status']),
 
-        'registration_host': StringProp(fill_brok=['full_status'], retention=True),
-        'registration_id': IntegerProp(default='?', fill_brok=['full_status'], retention=True),
-        'registration_state_id': IntegerProp(default=0, fill_brok=['full_status'], retention=True),
-        'registration_state': StringProp(default='PENDING', fill_brok=['full_status'], retention=True),
+        # 'registration_host': StringProp(fill_brok=['full_status'], retention=True),
+        # 'registration_id': IntegerProp(default='?', fill_brok=['full_status'], retention=True),
+        # 'registration_state_id': IntegerProp(default=0, fill_brok=['full_status'], retention=True),
+        # 'registration_state': StringProp(default='PENDING', fill_brok=['full_status'], retention=True),
         'perf_data': StringProp(default='{}', fill_brok=['full_status'], retention=True),
 
         'latency': FloatProp(default=0, fill_brok=['full_status'], retention=True),
