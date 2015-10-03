@@ -81,6 +81,8 @@ class ExternalCommandManager:
             {'global': False, 'args': ['host', None, None]},
         'CHANGE_CUSTOM_SVC_VAR':
             {'global': False, 'args': ['service', None, None]},
+        'DEL_CUSTOM_SVC_VAR':
+            {'global': False, 'args': ['service', None]},
         'CHANGE_GLOBAL_HOST_EVENT_HANDLER':
             {'global': True, 'args': ['command']},
         'CHANGE_GLOBAL_SVC_EVENT_HANDLER':
@@ -883,6 +885,13 @@ class ExternalCommandManager:
     def CHANGE_CUSTOM_SVC_VAR(self, service, varname, varvalue):
         service.modified_attributes |= DICT_MODATTR["MODATTR_CUSTOM_VARIABLE"].value
         service.customs[varname.upper()] = varvalue
+        self.sched.get_and_register_status_brok(service)
+
+    def DEL_CUSTOM_SVC_VAR(self, service, varname):
+        service.modified_attributes |= DICT_MODATTR["MODATTR_CUSTOM_VARIABLE"].value
+        if varname.upper() in service.customs:
+            del service.customs[varname.upper()]
+        self.sched.get_and_register_status_brok(service)
 
     # CHANGE_GLOBAL_HOST_EVENT_HANDLER;<event_handler_command>
     def CHANGE_GLOBAL_HOST_EVENT_HANDLER(self, event_handler_command):
