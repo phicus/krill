@@ -1022,7 +1022,7 @@ class Regenerator(object):
         clean_prop = ['check_command', 'servicegroups',
                       'contacts', 'notification_period', 'contact_groups',
                       'check_period', 'event_handler',
-                      'maintenance_period', 'customs', 'escalations']
+                      'maintenance_period', 'escalations']
 
         # some are only use when a topology change happened
         toplogy_change = b.data['topology_change']
