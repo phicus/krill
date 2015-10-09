@@ -76,17 +76,17 @@ class Cpe(Item):
         else:
             return 'id%d' % self.id
 
-    def set_registration_info(self, host_name, id, state_id, state, perf_data):
-        self.registration_host = host_name
-        self.registration_id = id
-        self.registration_state_id = state_id
-        self.registration_state = state
-        self.perf_data = perf_data
+    # def set_registration_info(self, host_name, id, state_id, state, perf_data):
+    #     self.registration_host = host_name
+    #     self.registration_id = id
+    #     self.registration_state_id = state_id
+    #     self.registration_state = state
+    #     self.perf_data = perf_data
 
-        #comment_type = 3 #1:host 2:service?
-        #c = Comment(self, persistent, author, comment, comment_type, 4, 0, False, 0)
-        #self.add_comment(c)
-        self.broks.append(self.get_update_status_brok())
+    #     #comment_type = 3 #1:host 2:service?
+    #     #c = Comment(self, persistent, author, comment, comment_type, 4, 0, False, 0)
+    #     #self.add_comment(c)
+    #     self.broks.append(self.get_update_status_brok())
 
     def get_full_str(self):
         full_name = str(self)
