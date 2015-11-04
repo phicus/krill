@@ -139,7 +139,7 @@ class Service(SchedulingItem):
             ListProp(default=['w', 'u', 'c', 'r', 'f', 's'],
                      fill_brok=['full_status'], split_on_coma=True),
         'notifications_enabled':
-            BoolProp(default=True, fill_brok=['full_status'], retention=True),
+            BoolProp(default=True, fill_brok=['full_status'], retention=False),
         'contacts':
             ListProp(default=[], brok_transformation=to_list_of_names,
                      fill_brok=['full_status'], merging='join'),
