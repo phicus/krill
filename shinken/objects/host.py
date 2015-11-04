@@ -142,7 +142,7 @@ class Host(SchedulingItem):
             ListProp(default=['d', 'u', 'r', 'f'], fill_brok=['full_status'],
                      merging='join', split_on_coma=True),
         'notifications_enabled':
-            BoolProp(default=True, fill_brok=['full_status'], retention=True),
+            BoolProp(default=True, fill_brok=['full_status'], retention=False),
         'stalking_options':
             ListProp(default=[''], fill_brok=['full_status']),
         'notes':
