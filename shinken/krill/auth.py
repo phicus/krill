@@ -40,3 +40,9 @@ def get_pots_charset_password(charset, passString, passLength):
     
     # Now truncate this character list to the required length and return
     return "".join(c2[-passLength:])
+
+if __name__ == '__main__':
+    charset='CHANGEME'
+    passString='line2-1'
+    passLength=8
+    print 'get_pots_charset_password', get_pots_charset_password(charset, passString, passLength)
