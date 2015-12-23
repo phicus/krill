@@ -803,7 +803,7 @@ class ExternalCommandManager:
         # safe_print('Finally got ARGS:', args)
         if len(args) == len(entry['args']):
             # safe_print("OK, we can call the command", c_name, "with", args)
-            logger.debug("TFLK-EC OK c_name:%s; args: %s" % (c_name, args))
+            #logger.debug("TFLK-EC OK c_name:%s; args: %s" % (c_name, args))
             return {'global': False, 'c_name': c_name, 'args': args}
             # f = getattr(self, c_name)
             # apply(f, args)

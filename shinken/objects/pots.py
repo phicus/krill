@@ -40,7 +40,6 @@ class Potses(Items):
         for pots in self:
             cpe = cpes.items[pots.cpeid]
             pots.cpe = cpe
-            print 'cpe.potses', id(cpe.potses), cpe
             cpe.potses.append(pots)
 
     def find_by_id(self, id):
