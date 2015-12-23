@@ -279,7 +279,6 @@ class Regenerator(object):
 
     # same than before, but the value is a string here
 
-...
     # We got a service/host dict, we want to get back to a
     # flat list
     def linkify_dict_srv_and_hosts(self, o, prop):
