@@ -7,6 +7,8 @@ from pysnmp.smi import builder, view
 import pysnmp.entity.rfc3413.oneliner.cmdgen as cmdgen
 from pysnmp.proto import errind
 
+import utils
+
 from shinken.log import logger
 
 
@@ -198,17 +200,17 @@ class SnmpClient(object):
             index_string = tuple([x.prettyPrint() for x in indices])
             try:
                 #print 'value %s %s %r --> %s' % (type(value), value, mv.getMibNode().syntax, mv.getMibNode().syntax.clone(value).prettyPrint())
-                value_string = mv.getMibNode().syntax.clone(value).prettyPrint()
+                final_value = mv.getMibNode().syntax.clone(value).prettyPrint()
             except AttributeError:
                 symName += index_string
-                value_string = "ERROR: %s -> %s" % (index_string, value.prettyPrint())
+                final_value = "ERROR: %s -> %s" % (index_string, value.prettyPrint())
 
             try:
                 i = [i for i,d in raw].index(index_string)
                 ti, td = raw[i]
-                td[symName] = value_string
+                td[symName] = utils.to_native(value)
             except Exception as exc:
-                raw.append((index_string, {symName: value_string}, ))
+                raw.append((index_string, {symName: final_value}, ))
 
         return raw
 

@@ -1,6 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+from pysnmp.proto import errind
+from client import SnmpRuntimeError
 
 def get_snmp_objects(snmp_client, cls, subindex=None):
 
@@ -83,20 +85,6 @@ class SnmpObject(object):
     properties = {}
     perf_data_properties = []
 
-
-class WalkObject(SnmpObject):
-
-    def __init__(self):
-        self.data = {}
-        for prop_key,prop_definition in self.properties.iteritems():
-            default_value_def = prop_definition[2]
-            if isinstance(default_value_def, dict):
-                #setattr(self, prop_key, dict().copy())
-                self.setattr(prop_key, dict().copy())
-            else:
-                #setattr(self, prop_key, default_value_def)
-                self.setattr(prop_key, default_value_def)
-
     def __getattribute__(self, name):
         try:
             return object.__getattribute__(self, name)
@@ -106,8 +94,14 @@ class WalkObject(SnmpObject):
             except KeyError:
                 return None
 
-    def getattr(self, field):
-        return self.data.get(field)
+
+    def __getstate__(self):
+        return self.__dict__
+
+
+    def __setstate__(self, state):
+        self.__dict__ = state
+
 
     def setattr(self, field, data, subindex=None):
         if subindex:
@@ -120,6 +114,11 @@ class WalkObject(SnmpObject):
 
         #setattr(self, field, data_to_assign)
         self.data[field] = data_to_assign
+
+
+    def getattr(self, field):
+        return self.data.get(field)
+
 
     @property
     def perf_data(self):
@@ -141,8 +140,27 @@ class WalkObject(SnmpObject):
         return {}
 
 
+class WalkObject(SnmpObject):
+
+    def __init__(self):
+        self.data = {}
+        for prop_key,prop_definition in self.properties.iteritems():
+            default_value_def = prop_definition[2]
+            if isinstance(default_value_def, dict):
+                #setattr(self, prop_key, dict().copy())
+                self.setattr(prop_key, dict().copy())
+            else:
+                #setattr(self, prop_key, default_value_def)
+                self.setattr(prop_key, default_value_def)
+
+
 class GetObject(SnmpObject):
+
     def __init__(self, community, ip, port=161):
         self.community = community
         self.ip = ip
         self.port = port
+
+        self.data = {}
+        for prop_key in self.properties.keys():
+            self.setattr(prop_key, None)

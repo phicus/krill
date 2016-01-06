@@ -1,6 +1,43 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+from pysnmp.proto.api import v2c
+
+
+def to_native(value):
+    if isinstance(value, v2c.Integer):
+        print '-0'
+        val = int(value.prettyPrint())
+    elif isinstance(value, v2c.Integer32):
+        print '-1', value
+        val = int(value.prettyPrint())
+    elif isinstance(value, v2c.Unsigned32):
+        print '-2', value
+        val = int(value.prettyPrint())
+    elif isinstance(value, v2c.Counter32):
+        print '-3', value
+        val = int(value.prettyPrint())
+    elif isinstance(value, v2c.Counter64):
+        print '-4', value
+        val = int(value.prettyPrint())
+    elif isinstance(value, v2c.Gauge32):
+        print '-5', value
+        val = int(value.prettyPrint())
+    elif isinstance(value, v2c.TimeTicks):
+        print '-6', value
+        val = int(value.prettyPrint())
+    elif isinstance(value, v2c.OctetString):
+        print '-7', value
+        val = value.prettyPrint()
+    elif isinstance(value, v2c.IpAddress):
+        print '-8', value
+        val = value.prettyPrint()
+    else:
+        print '-9', value
+        val = value
+    print 'val', val
+    return val
+
 
 def _itemid_callback(itemid):
     return itemid

@@ -7,6 +7,10 @@ from threading import Thread
 from pysnmp.smi import builder, view
 from pysnmp.entity.rfc3413.oneliner import cmdgen
 
+from pyasn1.type import univ
+
+import utils
+
 
 class Worker(Thread):
 
@@ -144,7 +148,7 @@ class SnmpPoller(object):
     def callback(self, sendRequestHandle, errorIndication, errorStatus, errorIndex,
               varBinds, cbCtx):
         (authData, transportTarget) = cbCtx
-        print('%s via %s' % (authData, transportTarget))
+        # print('%s via %s' % (authData, transportTarget))
 
         if errorIndication:
             print(errorIndication)
@@ -173,22 +177,36 @@ class SnmpPoller(object):
             if val is None:
                 print(oid.prettyPrint())
             else:
-                print('%s = %s' % (oid.prettyPrint(), val.prettyPrint()))
+                # print(' --> %s = %s' % (oid.prettyPrint(), val.prettyPrint()))
                 for field, field_def in this_object.properties.iteritems():
                     mib, symbol, _ = field_def
+                    # print '??', modName, mib, symName, symbol
                     if modName == mib and symName == symbol:
-                        setattr(this_object, field, val.prettyPrint())
+                        # print 'syntax1', type(mv.getMibNode().syntax.clone(val))
+                        value = mv.getMibNode().syntax.clone(val).prettyPrint()
+                        # print 'syntax2', value, type(value)
+                        # value = utils.to_native(val)
+                        # print 'syntax3', value, type(value)
+                        this_object.setattr(field, value)
 
 
 if __name__ == '__main__':
+
+    import objects
+
+    class Docsis2xCm(objects.GetObject):
+
+        properties = {
+            'configfile': ('DOCS-CABLE-DEVICE-MIB', 'docsDevServerConfigFile', 0),
+            # 'dnfreq': ('DOCS-IF-MIB', 'docsIfDownChannelFrequency', 3),
+            'dnpower': ('DOCS-IF-MIB', 'docsIfDownChannelPower', 3),
+        }
+
     p = SnmpPoller(
         mibs=['DOCS-CABLE-DEVICE-MIB'],
         mibSources=['/home/irojo/dev/krill-modules/krill-docsis/module/snmpcmts/pymibs']
     )
-    p.append_target('pubsl', '10.105.15.10', 161,
-        (
-            ('DOCS-CABLE-DEVICE-MIB', 'docsDevServerConfigFile', 0),
-            ('SNMPv2-MIB', 'sysLocation', 0)
-        )
-    )
-    p.run()
+    o = Docsis2xCm(community='pubsl', ip='10.105.15.10')
+    p.set_objects_to_poll([o])
+    p.async()
+    print '!!', o.configfile, o.dnpower
