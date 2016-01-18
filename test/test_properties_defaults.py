@@ -229,7 +229,7 @@ class TestConfig(PropertiesTester, ShinkenTest):
         ('webui_host', '0.0.0.0'),
 
         ('use_multiprocesses_serializer', False),
-        ('daemon_thread_pool_size', 8),
+        ('daemon_thread_pool_size', 16),
         ('enable_environment_macros', True),
         ('timeout_exit_status', 2),
 
@@ -278,7 +278,7 @@ class TestContactgroup(PropertiesTester, ShinkenTest):
 
     unused_props = []
 
-    without_default = ['contactgroup_name', 'alias']
+    without_default = ['contactgroup_name', 'contactgroup_members', 'alias']
 
     properties = dict([
         ('members', None),
@@ -487,7 +487,7 @@ class TestHostgroup(PropertiesTester, ShinkenTest):
 
     unused_props = []
 
-    without_default = ['hostgroup_name', 'alias']
+    without_default = ['hostgroup_name', 'hostgroup_members', 'alias']
 
     properties = dict([
         ('members', None),
@@ -592,8 +592,8 @@ class TestHost(PropertiesTester, ShinkenTest):
         ('snapshot_enabled', False),
         ('snapshot_period', ''),
         ('snapshot_criteria', ['d','u']),
-        ('business_rule_host_notification_options', ['']),
-        ('business_rule_service_notification_options', ['']),
+        ('business_rule_host_notification_options', []),
+        ('business_rule_service_notification_options', []),
         ])
 
     def setUp(self):
@@ -795,7 +795,7 @@ class TestServicegroup(PropertiesTester, ShinkenTest):
 
     unused_props = []
 
-    without_default = ['servicegroup_name', 'alias']
+    without_default = ['servicegroup_name', 'servicegroup_members', 'alias']
 
     properties = dict([
         ('members', None),
@@ -896,8 +896,8 @@ class TestService(PropertiesTester, ShinkenTest):
         ('snapshot_enabled', False),
         ('snapshot_period', ''),
         ('snapshot_criteria', ['w','c','u']),
-        ('business_rule_host_notification_options', None),
-        ('business_rule_service_notification_options', None),
+        ('business_rule_host_notification_options', []),
+        ('business_rule_service_notification_options', []),
         ('host_dependency_enabled', True),
         ])
 
