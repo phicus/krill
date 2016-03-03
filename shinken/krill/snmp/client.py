@@ -1,6 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+import socket
+
 from pysnmp.entity import engine, config
 from pysnmp.carrier.asynsock.dgram import udp
 from pysnmp.smi import builder, view
@@ -182,13 +184,17 @@ class SnmpClient(object):
             raise exceptions.SNMPExceptionError(exc)
 
 
-    def walk(self, mib, symbol, subindex=None, **kwargs):
-        mibVariable = cmdgen.MibVariable(mib, symbol).loadMibs(mib)
-        mibVariable.resolveWithMib(self.mibViewController)
+    def walk(self, oid, subindex=None, **kwargs):
+        if len(oid) == 2:
+            mib, symbol = oid
+            mibVariable = cmdgen.MibVariable(mib, symbol).loadMibs(mib)
+            mibVariable.resolveWithMib(self.mibViewController)
+            oid_to_walk = mibVariable.asTuple()
+        else:
+            oid_to_walk = oid
 
-        oid_to_walk = str(mibVariable)
         if subindex:
-            oid_to_walk += '.' + '.'.join(subindex)
+            oid_to_walk += subindex
 
         data = self._next_cmd_data(oid_to_walk, **kwargs)
 

@@ -2,13 +2,15 @@
 # -*- coding: utf-8 -*-
 
 from pysnmp.proto import errind
+
+from shinken.log import logger
+
 from client import SnmpRuntimeError
 
 def get_snmp_objects(snmp_client, cls, subindex=None):
 
-    def _get_walk_data_up_to_len(up_to_len, mib, symbol, **kwargs):
+    def _get_walk_data_up_to_len(up_to_len, oid, **kwargs):
         # logger.info("[PON] _get_walk_data_up_to_len0 %d/%s" % (up_to_len, symbol))
-        # print "[PON] _get_walk_data_up_to_len0 %d/%s" % (up_to_len, symbol)
 
         walk_data_len = -100
         retries_count = 0
@@ -24,9 +26,9 @@ def get_snmp_objects(snmp_client, cls, subindex=None):
                 time.sleep(TIME_TO_WAIT_BETWEEN_RETRIES)
 
             try:
-                walk_data = snmp_client.walk(mib, symbol, subindex, **kwargs)
+                walk_data = snmp_client.walk(oid, subindex, **kwargs)
             except errind.OidNotIncreasing:
-                # logger.info("[PON] get_snmp_objects errind.OidNotIncreasing %s/%s" % (mib, symbol))
+                # logger.info("[PON] get_snmp_objects errind.OidNotIncreasing %s" % (oid))
                 errind_OidNotIncreasing = True
                 walk_data = []
             except SnmpRuntimeError, exc:
@@ -46,16 +48,16 @@ def get_snmp_objects(snmp_client, cls, subindex=None):
     data_len = 0
     for field, field_def in cls_properties.iteritems():
 
-        if len(field_def) == 4:
-            mib, symbol, _, kwargs = field_def    
+        if len(field_def) == 3:
+            oid, _, kwargs = field_def
         else:
-            mib, symbol, _ = field_def
+            oid, _ = field_def
             kwargs = {}
 
-        if not mib or not symbol:
+        if not oid:
             continue
 
-        walk_data = _get_walk_data_up_to_len(len(snmp_objects), mib, symbol, **kwargs)
+        walk_data = _get_walk_data_up_to_len(len(snmp_objects), oid, **kwargs)
 
         for object_index, object_data in walk_data:
             # logger.info("[PON] get_snmp_objects object_index/object_data %r/%r" % (object_index, object_data))
@@ -75,8 +77,8 @@ def get_snmp_objects(snmp_client, cls, subindex=None):
                 o = cls()
                 snmp_objects.append((object_index, o))
 
-            #logger.info("[PON]get_snmp_objects->setattr %s/%s/%s/%s/%s -> %d" % (field, object_data[symbol], object_index, current_index, current_subindex, id(o)))
-            o.setattr(field, object_data[symbol], current_subindex)
+            # logger.info("[PON]get_snmp_objects->setattr %s/%s/%s/%s/%s -> %d" % (field, object_data[symbol], object_index, current_index, current_subindex, id(o)))
+            o.setattr(field, object_data.itervalues().next(), current_subindex)
 
     return snmp_objects
 
@@ -145,7 +147,7 @@ class WalkObject(SnmpObject):
     def __init__(self):
         self.data = {}
         for prop_key,prop_definition in self.properties.iteritems():
-            default_value_def = prop_definition[2]
+            default_value_def = prop_definition[1]
             if isinstance(default_value_def, dict):
                 #setattr(self, prop_key, dict().copy())
                 self.setattr(prop_key, dict().copy())
