@@ -16,7 +16,7 @@
 
 import sha, string
 
-def get_pots_charset_password(charset, passString, passLength):
+def get_charset_password(charset, passString, passLength):
     """This function creates a SHA-1 hash from the passString. The 40 nibbles of
     this hash are used as indexes into the charset from where the characters are
     picked. This is again shuffled by repeating the above process on this subset.
@@ -41,8 +41,13 @@ def get_pots_charset_password(charset, passString, passLength):
     # Now truncate this character list to the required length and return
     return "".join(c2[-passLength:])
 
+def get_pots_charset_password(charset, seed, length):
+    return get_charset_password(charset, seed, length)
+
 if __name__ == '__main__':
-    charset='CHANGEME'
-    passString='line2-1'
-    passLength=8
+    import sys
+
+    charset=sys.argv[1]
+    passString=sys.argv[2]
+    passLength=int(sys.argv[3])
     print 'get_pots_charset_password', get_pots_charset_password(charset, passString, passLength)
