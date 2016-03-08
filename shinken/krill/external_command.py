@@ -27,24 +27,24 @@ class KrillExternalCommands(object):
         self.extcmds = []
 
 
-    def process_host_check_result(self, cpe, state_string, output):
-        self._set(cpe, '__HOST__', self.HOSTSTATES[state_string], output)
+    def process_host_check_result(self, host, state_string, output):
+        self._set(host, '__HOST__', self.HOSTSTATES[state_string], output)
 
 
-    def process_service_check_result(self, cpe, service, state_string, output):
-        self._set(cpe, service, self.SERVICESTATES[state_string], output)
+    def process_service_check_result(self, host, service, state_string, output):
+        self._set(host, service, self.SERVICESTATES[state_string], output)
 
 
-    def _set(self, cpe, service, state, output):
-        host = 'cpe%d' % cpe.id
+    def _set(self, host, service, state, output):
+        # host = 'cpe%d' % cpe.id
         if host not in self.host_services:
             self.host_services[host] = {}
 
         self.host_services[host][service] = (int(time.time()), state, output)
 
 
-    def add_simple_host_dependency(self, cpe, olt):
-        extcmd = '[%d] ADD_SIMPLE_HOST_DEPENDENCY;cpe%d;%s' % (int(time.time()), cpe.id, olt.name)
+    def add_simple_host_dependency(self, son, father):
+        extcmd = '[%d] ADD_SIMPLE_HOST_DEPENDENCY;%s;%s' % (int(time.time()), son.name, father.name)
         extcmd = extcmd.decode('utf8', 'replace')
         self.extcmds.append(extcmd)
 
@@ -72,9 +72,9 @@ class KrillExternalCommands(object):
         return extcmds
 
 
-    def get_process_host_check_result_extcmd(self, cpe, state_string, output):
+    def get_process_host_check_result_extcmd(self, host, state_string, output):
         ts = int(time.time())
-        host = 'cpe%d' % cpe.id
+        # host = 'cpe%d' % cpe.id
         state = self.HOSTSTATES[state_string]
         extcmd = '[%d] %s;%s;%s;%s' % (ts, 'PROCESS_HOST_CHECK_RESULT', host, state, output)
         return extcmd
@@ -85,5 +85,8 @@ class KrillExternalCommands(object):
         for extcmd in self.all():
             logger.info("[EC] send_all extcmd=%s" % extcmd)
             e = ExternalCommand(extcmd)
-            self.from_q.put(e)
+            if self.from_q:
+                self.from_q.put(e)
+            else:
+                logger.info("[EC] send_all e=%s" % e)
         logger.info("[EC] send_all!!!")

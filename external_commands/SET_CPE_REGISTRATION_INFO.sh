@@ -14,7 +14,7 @@ printf "[%lu] PROCESS_HOST_CHECK_RESULT;cpe10;0;demo" $now > $commandfile
 
 printf "[%lu] PROCESS_SERVICE_CHECK_RESULT;localhost;memory;0;MEMORY" $now > $commandfile
 
-printf "[%lu] PROCESS_HOST_CHECK_RESULT;cpe5;0;'active' olthuawei 0/0/0-0 no IP | txoctets=0B rxoctets=0B" $now > $commandfile
+printf "[%lu] PROCESS_HOST_CHECK_RESULT;cpe89;0;tflk" $(date +%s) > $commandfile
 
 
 
