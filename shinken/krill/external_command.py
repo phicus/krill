@@ -44,7 +44,7 @@ class KrillExternalCommands(object):
 
 
     def add_simple_host_dependency(self, son, father):
-        extcmd = '[%d] ADD_SIMPLE_HOST_DEPENDENCY;%s;%s' % (int(time.time()), son.host_name, father.host_name)
+        extcmd = '[%d] ADD_SIMPLE_HOST_DEPENDENCY;%s;%s' % (int(time.time()), son, father)
         extcmd = extcmd.decode('utf8', 'replace')
         self.extcmds.append(extcmd)
 
