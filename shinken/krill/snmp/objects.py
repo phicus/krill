@@ -1,6 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+import time
+
 from pysnmp.proto import errind
 
 from shinken.log import logger
