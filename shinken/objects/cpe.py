@@ -105,12 +105,8 @@ class Cpes(Items):
     name_property = 'id'
     inner_class = Cpe
 
-    def linkify(self, customers, cpeprofiles, cpemodels):
+    def linkify(self, cpeprofiles, cpemodels):
         for cpe in self:
-            customer = customers.items[cpe.customerid]
-            cpe.customer = customer
-            customer.add_cpe_link(cpe)
-
             if cpe.profileid:
                 cpeprofile = cpeprofiles.items[cpe.profileid]
                 cpe.profile = cpeprofile

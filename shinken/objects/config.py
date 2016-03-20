@@ -1277,7 +1277,7 @@ class Config(Item):
         self.reactionners.linkify(self.realms, self.modules)
         self.pollers.linkify(self.realms, self.modules)
 
-        self.cpes.linkify(self.customers, self.cpeprofiles, self.cpemodels)
+        self.cpes.linkify(self.cpeprofiles, self.cpemodels)
         self.potses.linkify(self.cpes)
 
         # Ok, now update all realms with backlinks of
