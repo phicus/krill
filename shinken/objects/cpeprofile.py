@@ -15,6 +15,7 @@ class CpeProfile(Item):
         'tech': StringProp(fill_brok=['full_status']),
         'downstream': StringProp(fill_brok=['full_status']),
         'upstream': StringProp(fill_brok=['full_status']),
+        'label': StringProp(fill_brok=['label']),
     })
 
     running_properties = Item.running_properties.copy()
