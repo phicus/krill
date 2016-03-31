@@ -21,7 +21,7 @@ class AttrDict(dict):
 
 
 class SnmpClient(object):
-    def __init__(self, host, port, community, mibs=[], mibSources=[]):
+    def __init__(self, host, port, community, mibs=[], mibSources=[], timeout=20, retries=1, version=2):
         self.host = host
         self.port = port
         self.community = community
@@ -61,9 +61,8 @@ class SnmpClient(object):
             self.mibBuilder.loadModules( *self.mibs )
         self.mibViewController = view.MibViewController(self.mibBuilder)
 
-        V2C = 1
-        self.auth_data = cmdgen.CommunityData('krill', self.community, V2C)
-        self.udp_transport_target = cmdgen.UdpTransportTarget((self.host, self.port), timeout=20, retries=1)
+        self.auth_data = cmdgen.CommunityData('krill', self.community, version-1)
+        self.udp_transport_target = cmdgen.UdpTransportTarget((self.host, self.port), timeout=timeout, retries=retries)
 
     def __str__(self):
         return '%s:%s:%s' % (self.host, self.port, self.community)
@@ -160,12 +159,13 @@ class SnmpClient(object):
         mv.resolveWithMib(self.mibViewController)
         return mv
 
-    def _next_cmd_data(self, oid, **kwargs):
+
+    def _next_cmd_data(self, oid, timeout=3, retries=1, **kwargs):
         try:
             (errorIndication, errorStatus, errorIndex, varBinds) = \
                 cmdgen.CommandGenerator().nextCmd(
                     self.auth_data, 
-                    cmdgen.UdpTransportTarget((self.host, self.port)),
+                    cmdgen.UdpTransportTarget((self.host, self.port), timeout=timeout, retries=retries),
                     oid,
                     #lookupNames=True, lookupValues=True
                     #ignoreNonIncreasingOid=True,
@@ -184,7 +184,7 @@ class SnmpClient(object):
             raise exceptions.SNMPExceptionError(exc)
 
 
-    def walk(self, oid, subindex=None, **kwargs):
+    def walk(self, oid, subindex=None, timeout=3, retries=1, **kwargs):
         if len(oid) == 2:
             mib, symbol = oid
             mibVariable = cmdgen.MibVariable(mib, symbol).loadMibs(mib)
@@ -196,7 +196,7 @@ class SnmpClient(object):
         if subindex:
             oid_to_walk += subindex
 
-        data = self._next_cmd_data(oid_to_walk, **kwargs)
+        data = self._next_cmd_data(oid_to_walk, timeout, retries, **kwargs)
 
         raw = []
         for oid, value in data:

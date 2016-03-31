@@ -62,11 +62,10 @@ class SnmpPoller(object):
         self.mibs = mibs
         self.mibSources = mibSources
 
-
         self.mibBuilder = builder.MibBuilder()
 
         extraMibSources = tuple([builder.DirMibSource(d) for d in self.mibSources])
-        totalMibSources = self.mibBuilder.getMibSources() + extraMibSources
+        totalMibSources = extraMibSources + self.mibBuilder.getMibSources()
         self.mibBuilder.setMibSources( *totalMibSources )
         if self.mibs:
             self.mibBuilder.loadModules( *self.mibs )
@@ -76,24 +75,35 @@ class SnmpPoller(object):
         self.objects_to_poll = []
 
 
-    def _get_mib_variables(self, args):
-        mib_variables = []
-        for arg in args:
-            mv = cmdgen.MibVariable(*arg)
-            mv.resolveWithMib(self.mibViewController)
-            mib_variables.append(mv)
-        return mib_variables
+    # def _get_mib_variables(self, args):
+    #     mib_variables = []
+    #     for arg in args:
+    #         mv = cmdgen.MibVariable(*arg)
+    #         mv.resolveWithMib(self.mibViewController)
+    #         mib_variables.append(mv)
+    #     return mib_variables
 
 
     def set_objects_to_poll(self, objects_to_poll):
         self.targets = []
         self.objects_to_poll = objects_to_poll
         for object_to_poll in self.objects_to_poll:
-            properties = object_to_poll.properties
-            mib_variables = self._get_mib_variables(properties.values())
+            mib_variables = []
+            for field, field_def in object_to_poll.properties.iteritems():
+
+                mibVariable = cmdgen.MibVariable(*field_def)
+                mibVariable.resolveWithMib(self.mibViewController)
+                mib_variables.append(mibVariable)
+
+            # properties = object_to_poll.properties
+            # mib_variables = self._get_mib_variables(properties.values())
+
             self.targets.append((
                 cmdgen.CommunityData(object_to_poll.community, mpModel=0),
-                cmdgen.UdpTransportTarget((object_to_poll.ip, object_to_poll.port)), mib_variables,
+                cmdgen.UdpTransportTarget((object_to_poll.ip, object_to_poll.port),
+                    timeout=object_to_poll.timeout,
+                    retries=object_to_poll.retries
+                ), mib_variables,
             ))
     
 
@@ -151,10 +161,10 @@ class SnmpPoller(object):
         # print('%s via %s' % (authData, transportTarget))
 
         if errorIndication:
-            print(errorIndication)
+            print 'errorIndication', errorIndication
             return 1
         if errorStatus:
-            print('%s at %s' % (
+            print ('errorStatus %s at %s' % (
                 errorStatus.prettyPrint(),
                 errorIndex and varBinds[int(errorIndex)-1] or '?'
                 )
