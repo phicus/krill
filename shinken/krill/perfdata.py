@@ -37,9 +37,10 @@ def process_perfdata(obj, s, prefix=''):
             return 'UNKNOWN', '%s=%s%s above max(%s%s)' % (metric.name, metric.value, metric.uom, metric.max, metric.uom)
 
         thresholds_name = '%s%s_thresholds' % (prefix, metric.name)
-        warning, critical = getattr(obj, thresholds_name).split(',')
-        # print 'w,c', warning, critical
-        checks.append(check_value(metric, metric.name, warning, critical))
+        if hasattr(obj, thresholds_name):
+            warning, critical = getattr(obj, thresholds_name).split(',')
+            # print 'w,c', warning, critical
+            checks.append(check_value(metric, metric.name, warning, critical))
     if CRITICAL in [chk[0] for chk in checks]:
         return 'CRITICAL', 'CRITICAL - ' + ' '.join([chk[1] for chk in checks if chk[0] == CRITICAL])
     if WARNING in [chk[0] for chk in checks]:

@@ -11,6 +11,10 @@ from pyasn1.type import univ
 
 import utils
 
+from shinken.log import logger
+
+CHUNK_SIZE = 5000
+HOSTS_PER_THREAD = 100
 
 class Worker(Thread):
 
@@ -26,11 +30,15 @@ class Worker(Thread):
     def run(self):
         while True:
             authData, transportTarget, varNames = self.requests.get()
+
+            errorIndication, errorStatus, errorIndex, varBinds = self.cmdGen.getCmd(
+                authData, transportTarget, *varNames,
+                lookupNames=True, lookupValues=True
+            )
+            cbCtx = (authData, transportTarget)
+
             self.responses.append(
-                self.cmdGen.getCmd(
-                    authData, transportTarget, *varNames,
-                    lookupNames=True, lookupValues=True
-                )
+                (errorIndication, errorStatus, errorIndex, varBinds, cbCtx)
             )
             self.requests.task_done()
 
@@ -85,8 +93,10 @@ class SnmpPoller(object):
 
 
     def set_objects_to_poll(self, objects_to_poll):
+
         self.targets = []
         self.objects_to_poll = objects_to_poll
+
         for object_to_poll in self.objects_to_poll:
             mib_variables = []
             for field, field_def in object_to_poll.properties.iteritems():
@@ -98,83 +108,105 @@ class SnmpPoller(object):
             # properties = object_to_poll.properties
             # mib_variables = self._get_mib_variables(properties.values())
 
+            logger.info("[SnmpPoller] set_objects_to_poll addr=%s", object_to_poll.ip)
             self.targets.append((
                 cmdgen.CommunityData(object_to_poll.community, mpModel=0),
                 cmdgen.UdpTransportTarget((object_to_poll.ip, object_to_poll.port),
                     timeout=object_to_poll.timeout,
                     retries=object_to_poll.retries
-                ), mib_variables,
+                ),
+                mib_variables,
             ))
-    
+        
 
     def async(self):
         '''
         http://pysnmp.sourceforge.net/examples/current/v3arch/oneliner/manager/cmdgen/get-async-multiple-transports-and-protocols.html
         '''
 
+        def chunks(l, n):
+            for i in range(0, len(l), n):
+                yield l[i:i+n]
+
         cmdGen  = cmdgen.AsynCommandGenerator()
 
-        for authData, transportTarget, varNames in self.targets:
-            cmdGen.getCmd(
-                authData, transportTarget, varNames,
-                # User-space callback function and its context
-                (self.callback, (authData, transportTarget)),
-                lookupNames=True, lookupValues=True
-            )
+        print 'chunks:', len(self.targets)
+        chunk_i = 1
+        for chunk in chunks(self.targets, CHUNK_SIZE):
+            print 'chunk...', chunk_i, len(chunk)
+            for authData, transportTarget, varNames in chunk:
+                cmdGen.getCmd(
+                    authData, transportTarget, varNames,
+                    # User-space callback function and its context
+                    (self.callback, (authData, transportTarget)),
+                    lookupNames=True, lookupValues=True
+                )
 
-        if self.targets:
             cmdGen.snmpEngine.transportDispatcher.runDispatcher()
+            print 'chunk!!!', chunk_i
+            chunk_i += 1
 
 
     def sync(self):
         '''
         http://pysnmp.sourceforge.net/examples/current/v3arch/oneliner/manager/cmdgen/get-threaded-multiple-transports-and-protocols.html
         '''
-        pool = ThreadPool(3)
+        threads = int(len(self.targets) / HOSTS_PER_THREAD)
+        logger.warning("[SnmpPoller] sync threads %d", threads)
+        pool = ThreadPool(threads)
 
         for authData, transportTarget, varNames in self.targets:
             pool.addRequest(authData, transportTarget, varNames)
         
         pool.waitCompletion()
 
-        for errorIndication, errorStatus, errorIndex, varBinds in pool.getResponses():
-            print('Response for %s from %s:' % (authData, transportTarget))
-            if errorIndication:
-                print(errorIndication)
-            if errorStatus:
-                print('%s at %s' % (
-                    errorStatus.prettyPrint(),
-                    errorIndex and varBinds[int(errorIndex)-1][0] or '?'
-                    )
-                )
+        for errorIndication, errorStatus, errorIndex, varBinds, cbCtx in pool.getResponses():
+            sendRequestHandle = None
+            self.callback(sendRequestHandle, errorIndication, errorStatus, errorIndex, varBinds, cbCtx)
+            continue
+
+            # print('Response for %s from %s:' % (authData, transportTarget))
+            # if errorIndication:
+            #     print(errorIndication)
+            # if errorStatus:
+            #     print('%s at %s' % (
+            #         errorStatus.prettyPrint(),
+            #         errorIndex and varBinds[int(errorIndex)-1][0] or '?'
+            #         )
+            #     )
             
-            for oid, val in varBinds:
-                if val is None:
-                    print(oid.prettyPrint())
-                else:
-                    print('%s = %s' % (oid.prettyPrint(), val.prettyPrint()))
+            # for oid, val in varBinds:
+            #     if val is None:
+            #         print(oid.prettyPrint())
+            #     else:
+            #         print('%s = %s' % (oid.prettyPrint(), val.prettyPrint()))
 
 
     def callback(self, sendRequestHandle, errorIndication, errorStatus, errorIndex,
               varBinds, cbCtx):
         (authData, transportTarget) = cbCtx
-        # print('%s via %s' % (authData, transportTarget))
 
         if errorIndication:
-            print 'errorIndication', errorIndication
-            return 1
+            logger.warning("[SnmpPoller] errorIndication %s %s %s",
+                transportTarget,
+                varBinds,
+                errorIndication
+            )
+            return 
         if errorStatus:
-            print ('errorStatus %s at %s' % (
+            logger.warning("[SnmpPoller] errorStatus %s %s %s %s",
+                transportTarget,
+                varBinds,
                 errorStatus.prettyPrint(),
                 errorIndex and varBinds[int(errorIndex)-1] or '?'
-                )
             )
-            return 1
+            return
         
         addr = transportTarget.transportAddr[0]
         try:
             this_object, = [o for o in self.objects_to_poll if o.ip == addr]
         except Exception, exc:
+            logger.warning("[SnmpPoller] this_object? addr=%s", addr)
             return
 
         for oid, val in varBinds:
@@ -185,7 +217,7 @@ class SnmpPoller(object):
             index_string = indices
 
             if val is None:
-                print(oid.prettyPrint())
+                logger.warning("[SnmpPoller] val none oid=%s", oid.prettyPrint())
             else:
                 # print(' --> %s = %s' % (oid.prettyPrint(), val.prettyPrint()))
                 for field, field_def in this_object.properties.iteritems():
@@ -198,6 +230,7 @@ class SnmpPoller(object):
                         # value = utils.to_native(val)
                         # print 'syntax3', value, type(value)
                         this_object.setattr(field, value)
+                        logger.info("[SnmpPoller] callback addr=%s %s->%s", addr, field, value)
 
 
 if __name__ == '__main__':

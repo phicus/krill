@@ -12,7 +12,7 @@ from client import SnmpRuntimeError
 def get_snmp_objects(snmp_client, cls, subindex=None):
 
     def _get_walk_data_up_to_len(up_to_len, oid, timeout, retries, **kwargs):
-        logger.info("[PON] _get_walk_data_up_to_len0 %d/%s" % (up_to_len, oid))
+        # logger.info("[PON] _get_walk_data_up_to_len0 %d/%s" % (up_to_len, oid))
 
         walk_data_len = -100
         retries_count = 0
