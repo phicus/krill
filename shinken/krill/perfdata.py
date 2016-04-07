@@ -1,6 +1,7 @@
 import re
 import operator
 from shinken.misc.perfdata import Metric, PerfDatas
+from shinken.log import logger
 
 OK = 0
 WARNING = 1
@@ -19,7 +20,6 @@ def check_value(metric, name, warning, critical):
     if op_func(float(metric.value), float(warning)):
         return (WARNING, '%s=%s%s %s %s%s!' % (name, metric.value, metric.uom, op_text, warning, metric.uom))
     return (OK, '%s=%s%s' % (name, metric.value, metric.uom))
-
 
 
 def process_perfdata(obj, s, prefix=''):
@@ -48,8 +48,127 @@ def process_perfdata(obj, s, prefix=''):
     return 'OK', 'OK - ' + ' '.join([chk[1] for chk in checks])
 
 
-if __name__ == '__main__':
+def process_raw_perfdata(raw_data, perf_defs):
 
+    def _check_value(warning, critical):
+        # print '_check_value', warning, critical
+        if float(warning) < float(critical):
+            op_func, op_text = operator.gt, '>'
+        else:
+            op_func, op_text = operator.lt, '<'
+
+        if critical and op_func(float(value), float(critical)):
+            return (CRITICAL, '{metric}={value:{format}}{unit} {op_text} {critical:{format}}{unit}!!'.format(
+                        metric=metric,
+                        value=value,
+                        format=format,
+                        unit=unit,
+                        op_text=op_text,
+                        critical=critical
+                    ))
+        if warning and op_func(float(value), float(warning)):
+            return (WARNING, '{metric}={value:{format}}{unit} {op_text} {warning:{format}}{unit}!'.format(
+                        metric=metric,
+                        value=value,
+                        format=format,
+                        unit=unit,
+                        op_text=op_text,
+                        warning=warning
+                    ))
+        return (OK, '{metric}={value:{format}}{unit}'.format(
+                        metric=metric,
+                        value=value,
+                        format=format,
+                        unit=unit,
+                    ))
+
+    checks = []
+    perfs = []
+    for pattern, format, unit, thresholds, min, max in perf_defs:
+        if len(thresholds) == 2:
+            warning, critical = thresholds
+            low_critical = low_warning = None
+        if len(thresholds) == 4:
+            low_critical, low_warning, warning, critical = thresholds
+
+        # print 'pattern, unit, warning, critical, min, max', pattern, unit, warning, critical, min, max
+        for metric, value in raw_data.iteritems():
+            if value is None:
+                continue
+
+            if re.match(r'%s(\d*)' % pattern, metric):
+                try:
+                    print 'process_raw_perfdata', metric, value, type(value), warning, critical, min, max, format, unit
+                    perfs.append('{metric}={value:{format}}{unit};{warning:{format}};{critical:{format}};{min:{format}};{max:{format}}'.format(
+                            metric=metric,
+                            value=value,
+                            warning=warning,
+                            critical=critical,
+                            min=min,
+                            max=max,
+                            format=format,
+                            unit=unit,
+                        ))
+                except Exception, exc:
+                    print 'process_raw_perfdata Exception', exc, metric, value, type(value), warning, critical, min, type(min), max, type(max), format, unit
+                    # logger.warning("[KRILK] process_raw_perfdata Exception: (%s) %s %s %s %s %s %s %s %s %s %s %s", exc, metric, value, type(value), warning, critical, min, type(min), max, type(max), format, unit)
+
+
+                if float(value) < float(min):
+                    checks.append((UNKNOWN, '{metric}={value:{format}}{unit} below min({min}{unit})'.format(
+                        metric=metric,
+                        value=value,
+                        min=min,
+                        format=format,
+                        unit=unit,
+                    )))
+                elif float(value) > float(max):
+                    checks.append((UNKNOWN, '{metric}={value:{format}}{unit} above max({max}{unit})'.format(
+                        metric=metric,
+                        value=value,
+                        max=max,
+                        format=format,
+                        unit=unit,
+                    )))
+                else:
+                    checks.append(_check_value(warning, critical))
+                    if low_critical and low_warning:
+                        checks.append(_check_value(low_warning, low_critical))
+
+    if UNKNOWN in [chk[0] for chk in checks]:
+        return 'UNKNOWN', 'UNKNOWN - ' + ' '.join([chk[1] for chk in checks if chk[0] == UNKNOWN]), ' '.join(perfs)
+    if CRITICAL in [chk[0] for chk in checks]:
+        return 'CRITICAL', 'CRITICAL - ' + ' '.join([chk[1] for chk in checks if chk[0] == CRITICAL]), ' '.join(perfs)
+    if WARNING in [chk[0] for chk in checks]:
+        return 'WARNING', 'WARNING - ' + ' '.join([chk[1] for chk in checks if chk[0] == WARNING]), ' '.join(perfs)
+    return 'OK', 'OK - ' + ' '.join([chk[1] for chk in checks]), ' '.join(perfs)
+
+
+
+def test_process_raw_perfdata():
+    # from collections import namedtuple
+    # SnmpPerf = namedtuple('SnmpPerf', ['dnsnr', 'dnsnr21', 'dnsnr21', 'dnsnr', 'dnsnr21', 'dnsnr21'])
+
+    raw_data = {
+        'dnsnr': 51.2,
+        'dnsnr21': 52,
+        'dnsnr22': 50,
+
+        'uptx': 23,
+        'uptx12': 23.12,
+        'uptx23': 23.34,
+
+        'dnrx': -18,
+    }
+    perf_defs=[
+        ('dnsnr', '.1f', 'dB', (45, 35), 0.5, 100),
+        ('uptx', '.1f', 'dBm', (58, 65), -2, +70),
+        ('dnrx', '.1f', 'dBm', (-20, -15, +15, +30), -50, +50),
+    ]
+    print process_raw_perfdata(raw_data, perf_defs)
+
+
+def test_process_perfdata():
     class Dummy(object):
 
         def __init__(self):
@@ -74,3 +193,7 @@ if __name__ == '__main__':
     print 'p4', process_perfdata(Dummy(), perfdata, prefix='sta')
     perfdata = "dntx=45dBm;30;40;-5;90 dnrx=-42dBm;-50;-60;-90;-30 dnsnr=54dB;40;30;5;90 uptx=17dBm;30;40;-5;90 uprx=-41dBm;-50;-60;-90;-30 upsnr=55dB;40;30;5;90"
     print 'p5', process_perfdata(Dummy(), perfdata, prefix='sta')
+
+if __name__ == '__main__':
+    test_process_raw_perfdata()
+
