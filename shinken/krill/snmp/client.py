@@ -64,8 +64,37 @@ class SnmpClient(object):
         self.auth_data = cmdgen.CommunityData('krill', self.community, version-1)
         self.udp_transport_target = cmdgen.UdpTransportTarget((self.host, self.port), timeout=timeout, retries=retries)
 
+
     def __str__(self):
         return '%s:%s:%s' % (self.host, self.port, self.community)
+
+
+    def get(self, oid, subindex=None, timeout=3, retries=1, **kwargs):
+        mibVariable = cmdgen.MibVariable(*oid)
+        mibVariable.resolveWithMib(self.mibViewController)
+        modName, symName, indices = mibVariable.getMibSymbol()
+        oid_to_get = mibVariable.asTuple()
+
+        if subindex:
+            oid_to_get += subindex
+
+        cmdGen = cmdgen.CommandGenerator()
+        errorIndication, errorStatus, errorIndex, varBinds = cmdGen.getCmd(
+            self.auth_data,
+            self.udp_transport_target,
+            oid_to_get,
+            # lookupNames=True, lookupValues=True
+        )
+        error = self.handle_snmp_error(errorIndication, errorStatus, errorIndex, varBinds)
+        if error:
+            raise SnmpRuntimeError(error['msg'])
+        else:
+            # for oid, value in varBinds:
+            #     print 'oid, value', modName, symName, indices, oid, value.prettyPrint()
+            # return '1.2.3.4'
+            value = varBinds[0][1]
+            return mibVariable.getMibNode().syntax.clone(value).prettyPrint()
+
 
     def set_named(self, mib, index, oid2value):
         varBinds = []
@@ -75,6 +104,7 @@ class SnmpClient(object):
             mv.resolveWithMib(self.mibViewController)
             varBinds.append((mv, value))
         self.set(varBinds)
+
 
     def set(self, varBinds):
         cmdGen = cmdgen.CommandGenerator()
@@ -200,7 +230,6 @@ class SnmpClient(object):
 
         raw = []
         for oid, value in data:
-            # print 'walk oid', mib, symbol, oid, value
             mv = self.get_resolved_mib_variable(oid)
             modName, symName, indices = mv.getMibSymbol()
             index_string = tuple([x.prettyPrint() for x in indices])
@@ -210,6 +239,7 @@ class SnmpClient(object):
             except AttributeError:
                 symName += index_string
                 final_value = "ERROR: %s -> %s" % (index_string, value.prettyPrint())
+            # print 'walk oid', mib, symbol, oid, value, final_value, index_string
 
             try:
                 i = [i for i,d in raw].index(index_string)
