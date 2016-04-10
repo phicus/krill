@@ -81,12 +81,20 @@ class KrillExternalCommands(object):
 
 
     def send_all(self):
+        def chunks(l, n):
+            for i in range(0, len(l), n):
+                yield l[i:i+n]
+
         logger.info("[EC] send_all...")
-        for extcmd in self.all():
-            logger.info("[EC] send_all extcmd=%s" % extcmd)
-            e = ExternalCommand(extcmd)
-            if self.from_q:
-                self.from_q.put(e)
-            else:
-                logger.info("[EC] send_all e=%s" % e)
+        COMMAND_CHUNK_SIZE = 500
+        for chunk in chunks(self.all(), COMMAND_CHUNK_SIZE):
+            for extcmd in chunk:
+                logger.info("[EC] send_all extcmd=%s" % extcmd)
+                e = ExternalCommand(extcmd)
+                if self.from_q:
+                    self.from_q.put(e)
+                else:
+                    logger.info("[EC] send_all e=%s" % e)
+            time.sleep(1)
+            logger.info("[EC] sleep")
         logger.info("[EC] send_all!!!")
