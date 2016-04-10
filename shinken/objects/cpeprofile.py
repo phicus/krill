@@ -27,7 +27,7 @@ class CpeProfile(Item):
         return '<cpeprofile#%d/>' % (self.id)
 
     def __str__(self):
-        return self.name
+        return 'cp:name=%s label=%s' % (self.name, self.label)
 
     def add_cpe_link(self, cpe):
         self.cpes.append(cpe)
