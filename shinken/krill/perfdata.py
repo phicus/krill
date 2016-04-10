@@ -98,7 +98,7 @@ def process_raw_perfdata(raw_data, perf_defs):
 
             if re.match(r'%s(\d*)' % pattern, metric):
                 try:
-                    print 'process_raw_perfdata', metric, value, type(value), warning, critical, min, max, format, unit
+                    # print 'process_raw_perfdata', metric, value, warning, critical, min, max, format, unit
                     perfs.append('{metric}={value:{format}}{unit};{warning:{format}};{critical:{format}};{min:{format}};{max:{format}}'.format(
                             metric=metric,
                             value=value,
