@@ -88,7 +88,7 @@ def get_snmp_objects(snmp_client, cls, subindex=None):
 
             timeout = getattr(cls, 'timeout', 3)
             retries = getattr(cls, 'retries', 1)
-            walk_data_list = _get_walk_data_up_to_len(len(snmp_objects), field_property.oid, timeout, retries)
+            walk_data_list = _get_walk_data_up_to_len(len(snmp_objects), field_property.oid, timeout, retries, **field_property.kwargs)
 
             for walk_index, walk_data in walk_data_list:
                 # logger.info("[PON] get_snmp_objects walk_index/walk_data %r/%r" % (walk_index, walk_data))
@@ -108,14 +108,16 @@ def get_snmp_objects(snmp_client, cls, subindex=None):
                     o = cls()
                     snmp_objects.append((walk_index, o))
 
+                # logger.info("[SnmpObjects]get_snmp_objects->setattr1 %s/%s/%s/%s/%s", field, walk_data, walk_index, current_index, current_subindex)
                 # logger.info("[SnmpObjects]get_snmp_objects->setattr1 client=%s %s/%s/%s/%s/%s", snmp_client, field, walk_data, walk_index, current_index, current_subindex)
                 # logger.info("[SnmpObjects]get_snmp_objects->setattr2 %s -> %s", walk_data.itervalues().next(), current_subindex)
                 # o.setattr(field, walk_data.itervalues().next(), current_subindex)
 
+                data_to_set = walk_data.itervalues().next()
                 if field_property.method == 'get':
-                    o.setattr(field, walk_data.itervalues().next())
+                    o.setattr(field, data_to_set)
                 else:
-                    o.appendattr(field, (tuple(list(walk_index)[1:]), walk_data.itervalues().next()))
+                    o.appendattr(field, (tuple(current_subindex), data_to_set))
 
 
     except SnmpRuntimeError, exc:
@@ -129,6 +131,7 @@ class SnmpObject(object):
 
     properties = {}
     perf_data_properties = []
+    perf_properties = []
 
     timeout = 3
     retries = 1
@@ -199,15 +202,15 @@ class SnmpObject(object):
 
 
     def new_perf(self, perf, value):
-        if perf not in self.perf_data_fields:
-            self.perf_data_fields.append(perf)
+        if perf not in self.perf_fields:
+            self.perf_fields.append(perf)
         self.setattr(perf, value)
 
 
     @property
     def perfs(self):
         ret = {}
-        for prop in self.perf_data_fields:
+        for prop in self.perf_fields:
             ret[prop] = self.getattr(prop)
         return ret
 
@@ -215,12 +218,16 @@ class SnmpObject(object):
 class WalkObject(SnmpObject):
 
     def __init__(self):
-        self.perf_data_fields = []
+        self.perf_fields = self.perf_properties
 
         self.data = {}
         for field, field_property in self.properties.iteritems():
             if field_property.method == 'get':
-                self.setattr(field, field_property.default)
+                
+                if isinstance(field_property.default, dict):
+                    self.setattr(field, field_property.default.copy())
+                else:
+                    self.setattr(field, field_property.default)
             else:
                 self.setattr(field, list())
 
@@ -234,7 +241,7 @@ class WalkObject(SnmpObject):
 class GetObject(SnmpObject):
 
     def __init__(self, community, ip, port=161):
-        self.perf_data_fields = []
+        self.perf_fields = self.perf_properties
 
         self.community = community
         self.ip = ip
