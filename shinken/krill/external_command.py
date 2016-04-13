@@ -31,6 +31,13 @@ class KrillExternalCommands(object):
         self._set(host, '__HOST__', self.HOSTSTATES[state_string], output)
 
 
+    def push_process_host_check_result(self, host_name, state_string, output):
+        ts = int(time.time())
+        state = self.HOSTSTATES[state_string]
+        extcmd = '[%d] %s;%s;%s;%s' % (ts, 'PROCESS_HOST_CHECK_RESULT', host_name, state, output)
+        self._push_extcmd(extcmd)
+
+
     def process_service_check_result(self, host, service, state_string, output):
         self._set(host, service, self.SERVICESTATES[state_string], output)
 
@@ -90,11 +97,15 @@ class KrillExternalCommands(object):
         for chunk in chunks(self.all(), COMMAND_CHUNK_SIZE):
             for extcmd in chunk:
                 logger.info("[EC] send_all extcmd=%s" % extcmd)
-                e = ExternalCommand(extcmd)
-                if self.from_q:
-                    self.from_q.put(e)
-                else:
-                    logger.info("[EC] send_all e=%s" % e)
+                self._push_extcmd(extcmd)
             time.sleep(1)
             logger.info("[EC] sleep")
         logger.info("[EC] send_all!!!")
+
+
+    def _push_extcmd(self, extcmd):
+        e = ExternalCommand(extcmd)
+        if self.from_q:
+            self.from_q.put(e)
+        else:
+            logger.info("[EC] _push_extcmd e=%s" % e)
