@@ -27,8 +27,9 @@ class KrillExternalCommands(object):
         self.extcmds = []
 
 
-    def process_host_check_result(self, host, state_string, output):
-        self._set(host, '__HOST__', self.HOSTSTATES[state_string], output)
+    def process_host_check_result(self, host_name, state_string, output, force=True):
+        if force or not self._yet(host_name, '__HOST__'):
+            self._set(host_name, '__HOST__', self.HOSTSTATES[state_string], output)
 
 
     def push_process_host_check_result(self, host_name, state_string, output):
@@ -40,6 +41,17 @@ class KrillExternalCommands(object):
 
     def process_service_check_result(self, host, service, state_string, output):
         self._set(host, service, self.SERVICESTATES[state_string], output)
+
+
+    def push_process_service_check_result(self, host_name, service, state_string, output):
+        ts = int(time.time())
+        state = self.SERVICESTATES[state_string]
+        extcmd = '[%d] %s;%s;%s;%s;%s' % (ts, 'PROCESS_SERVICE_CHECK_RESULT', host_name, service, state, output)
+        self._push_extcmd(extcmd)
+
+
+    def _yet(self, host, service):
+        return host not in self.host_services or service not in self.host_services[host]
 
 
     def _set(self, host, service, state, output):
