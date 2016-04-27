@@ -408,6 +408,16 @@ class ExternalCommandManager:
 
         'SET_CPE_REGISTRATION_INFO':
             {'global': False, 'args': ['cpe', 'host', None, 'to_int', None, None]},
+        'REBOOT_HOST':
+            {'global': False, 'args': ['host']},
+        'SYNC_TIME_HOST':
+            {'global': False, 'args': ['host']},
+        'RESTORE_HOST':
+            {'global': False, 'args': ['host']},
+        'RESTORE_FACTORY_HOST':
+            {'global': False, 'args': ['host']},
+        'UNPROVISION_HOST':
+            {'global': False, 'args': ['host']},
     }
 
     def __init__(self, conf, mode):
@@ -2079,8 +2089,34 @@ class ExternalCommandManager:
         logger.debug("Poller %s added", poller_name)
         logger.debug("Potential %s", str(r.get_potential_satellites_by_type('poller')))
 
+
     def SET_CPE_REGISTRATION_INFO(self, cpe, host, reg_id, state_id, state, perf_data):
         cpe.set_registration_info(host.host_name, reg_id, state_id, state, perf_data)
+
+
+    def REBOOT_HOST(self, host):
+        b = Brok('reboot_host', {'host_name': host.host_name})
+        host.broks.append(b)
+
+
+    def SYNC_TIME_HOST(self, host):
+        b = Brok('sync_time_host', {'host_name': host.host_name})
+        host.broks.append(b)
+
+
+    def RESTORE_HOST(self, host):
+        b = Brok('restore_host', {'host_name': host.host_name})
+        host.broks.append(b)
+
+
+    def RESTORE_FACTORY_HOST(self, host):
+        b = Brok('restore_factory_host', {'host_name': host.host_name})
+        host.broks.append(b)
+
+
+    def UNPROVISION_HOST(self, host):
+        b = Brok('unprovision_host', {'host_name': host.host_name})
+        host.broks.append(b)
 
 
 if __name__ == '__main__':
