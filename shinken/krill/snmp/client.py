@@ -55,7 +55,7 @@ class SnmpClient(object):
         self.mibBuilder = builder.MibBuilder()
 
         extraMibSources = tuple([builder.DirMibSource(d) for d in self.mibSources])
-        totalMibSources = self.mibBuilder.getMibSources() + extraMibSources
+        totalMibSources = extraMibSources + self.mibBuilder.getMibSources()
         self.mibBuilder.setMibSources( *totalMibSources )
         if self.mibs:
             self.mibBuilder.loadModules( *self.mibs )
