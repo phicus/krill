@@ -49,7 +49,7 @@ class TechRegenerator(object):
     def manage_program_status_brok(self, b):
         data = b.data
         c_id = data['instance_id']
-        print 'TECH manage_program_status_brok', b.data
+        # print 'TECH manage_program_status_brok', b.data
         self.inp_hosts[c_id] = Hosts([])
 
 
@@ -61,40 +61,35 @@ class TechRegenerator(object):
 
         if customs.get('_TECH') == self.tech:
             key = CPEKEY_BY_TECH[self.tech]
+            h = Host({})
+            self.update_element(h, data)
+            # safe_print("TECH Creating a host: %s/%s in instance %d" % (hname, data.get('hostgroups', 'hgs?'), inst_id))
+
             if key in customs:
                 self.indices[customs.get(key).lower()] = TechCpe(hname, data, self.customs)
-            else:
-                try:
-                    inp_hosts = self.inp_hosts[inst_id]
-                except Exception, exp:  # not good. we will cry in theprogram update
-                    print "Not good!", exp
-                    return
-                safe_print("TECH Creating a host: %s in instance %d" % (hname, inst_id))
 
-                h = Host({})
-                self.update_element(h, data)
-
-                # We need to rebuild Downtime and Comment relationship
-                for dtc in h.downtimes + h.comments:
-                    dtc.ref = h
-
-                # Ok, put in in the in progress hosts
-                inp_hosts[h.id] = h
+            try:
+                inp_hosts = self.inp_hosts[inst_id]
+            except Exception, exp:  # not good. we will cry in theprogram update
+                print "Not good!", exp
+                return
+            # Ok, put in in the in progress hosts
+            inp_hosts[h.id] = h
 
 
     def manage_host_check_result_brok(self, b):
         data = b.data
-        print 'TECH manage_host_check_result_brok', data['host_name'], data['state']
+        # print 'TECH manage_host_check_result_brok', data['host_name'], data['state']
         self.manage_update_host_status_brok(b)
 
 
     def manage_update_host_status_brok(self, b):
         data = b.data
-        print 'TECH manage_update_host_status_brok', data['host_name'], data['state']
+        # print 'TECH manage_update_host_status_brok', data['host_name'], data['state']
         hname = data['host_name']
         h = self.hosts.find_by_name(hname)
         if h:
-            print 'TECH manage_update_host_status_brok h!', h
+            # print 'TECH manage_update_host_status_brok h!', h
             h.state = data['state']
 
 
@@ -113,7 +108,7 @@ class TechRegenerator(object):
             return
 
         for h in inp_hosts:
-            print "TECH add h", h
+            # print "TECH add h", h
             self.hosts.add_item(h)
 
         # clean old objects
