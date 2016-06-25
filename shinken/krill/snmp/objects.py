@@ -187,8 +187,8 @@ class SnmpObject(object):
         self.data[field].append(data)
 
 
-    def getattr(self, field):
-        return self.data.get(field)
+    def getattr(self, field, default=None):
+        return self.data.get(field, default)
 
 
     @property
