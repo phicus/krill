@@ -14,7 +14,7 @@
 #      alphanumeric characters.
 #    2. Renamed the old password generation function to GeneratePasswordWithCharSet()
 
-import sha, string
+import hashlib, string
 
 def get_charset_password(charset, passString, passLength):
     """This function creates a SHA-1 hash from the passString. The 40 nibbles of
@@ -26,7 +26,7 @@ def get_charset_password(charset, passString, passLength):
     charlen = len(charset)
     c1 = []
     n = 0
-    s = sha.sha(passString).hexdigest() # this gives a 40 nibble string (160 bits)
+    s = hashlib.sha1(passString).hexdigest() # this gives a 40 nibble string (160 bits)
     for nibble in s:
         n = (n + string.atoi(nibble,16)) % charlen
         c1.append(charset[n])  # this will finally generate a 40 character list
