@@ -418,6 +418,8 @@ class ExternalCommandManager:
             {'global': False, 'args': ['host']},
         'UNPROVISION_HOST':
             {'global': False, 'args': ['host']},
+        'UNPROVISION_ONU':
+            {'global': False, 'args': ['host', None]},
     }
 
     def __init__(self, conf, mode):
@@ -2116,6 +2118,12 @@ class ExternalCommandManager:
 
     def UNPROVISION_HOST(self, host):
         b = Brok('unprovision_host', {'host_name': host.host_name})
+        host.broks.append(b)
+
+
+    def UNPROVISION_ONU(self, host, onu_index):
+        logger.info("[TFLK] UNPROVISION_ONU %s %s", host.host_name, onu_index)
+        b = Brok('unprovision_onu', {'host_name': host.host_name, 'onu_index': onu_index})
         host.broks.append(b)
 
 
