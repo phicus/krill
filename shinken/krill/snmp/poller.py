@@ -63,6 +63,7 @@ class TimeoutQueue(Queue):
         else:
             self.failed_loops += 1
             if self.failed_loops >= MAX_FAILED_LOOPS:
+                logger.info("[SnmpPoller] tasks_are_working (self.failed_loops >= MAX_FAILED_LOOPS!!) unfinished_tasks=%d init_unfinished_tasks=%d", self.unfinished_tasks, self.init_unfinished_tasks)
                 try:
                     pct_unfinished_tasks = 100 * self.unfinished_tasks/float(self.init_unfinished_tasks)
                 except:
@@ -453,7 +454,7 @@ class SnmpPoller(object):
 
         for oid_val in varBinds:
             oid, val = oid_val
-            print 'oid, val', addr, oid, val
+            # print 'oid, val', addr, oid, val
             # oid, val = oid_val[0]
             # logger.warning("[SnmpPoller] oid_val, oid, val %s %s %s", oid_val, oid, val)
             mv = cmdgen.MibVariable(oid)
