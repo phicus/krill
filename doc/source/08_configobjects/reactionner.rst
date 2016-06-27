@@ -62,10 +62,10 @@ reactionner_name
   This variable is used to identify the *short name* of the reactionner which the data is associated with.
 
 address
-  This directive is used to define the address from where the main arbier can reach this reactionner. This can be a DNS name or a IP address.
+  This directive is used to define the address from where the main arbiter can reach this reactionner. This can be a DNS name or a IP address.
 
 port
-  This directive is used to define the TCP port used bu the daemon. The default value is *7772*.
+  This directive is used to define the TCP port used bu the daemon. The default value is *7769*.
 
 spare
   This variable is used to define if the reactionner must be managed as a spare one (will take the conf only if a master failed). The default value is *0* (master).
