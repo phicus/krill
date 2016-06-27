@@ -81,10 +81,12 @@ class PerfDef(object):
 
 
     def filter_metric(self, metric):
-        if re.match(r'^%s(\d*)$' % self.pattern, metric):
-            return True
+        m = re.match(r'^%s(?P<index>\d*)$' % self.pattern, metric)
+        if m:
+            # print 'filter_metric %s p=%s m=%s i=%s t=%s ' % (self, self.pattern, metric, m.group('index'), type(m.group('index')))
+            return True, m.group('index') == ''
         else:
-            return False
+            return False, False
 
 
     def get_perf(self, metric, value):
@@ -220,11 +222,13 @@ def process_raw_perfdata(raw_data, perf_defs):
             if value is None:
                 continue
 
-            if pd.filter_metric(metric):
+            it_matchs, is_root = pd.filter_metric(metric)
+            if it_matchs:
                 perf = pd.get_perf(metric, value)
                 perfs.append(perf)
 
-                if pd.is_checked:
+                if pd.is_checked and is_root:
+                    # print 'it_matchs, is_root', it_matchs, is_root
                     checks.extend(pd.get_checks(metric, value))
 
                 # print '--', checks
