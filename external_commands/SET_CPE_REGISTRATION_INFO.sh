@@ -16,6 +16,12 @@ printf "[%lu] PROCESS_SERVICE_CHECK_RESULT;localhost;memory;0;MEMORY" $now > $co
 
 printf "[%lu] PROCESS_HOST_CHECK_RESULT;cpe89;0;tflk" $(date +%s) > $commandfile
 
+printf "[%lu] ADD_HOST_COMMENT;localhost;0;admin;hello world" $(date +%s) > $commandfile
+
+printf "[%lu] RESET_HOST;cpe1" $(date +%s) > $commandfile
+
+printf "[%lu] UNPROVISION_ONU;oltmqt;0/0/0/0" $(date +%s) > $commandfile
+
 
 
 /opt/fos/bin/push_dhcp_lease --transaction=commit --lease-time=3600 --leased-address=10.142.0.44 --hardware=30:c:23:be:3b:3b --host-name=atadevice30:0c:23:be:3b:3b --circuit-id=pon/422/OLTZTE/1/1/2/5/6/1 --remote-id=5a544547c15383f2

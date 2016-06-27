@@ -79,6 +79,8 @@ class ExternalCommandManager:
             {'global': True, 'args': ['contact', None, None]},
         'CHANGE_CUSTOM_HOST_VAR':
             {'global': False, 'args': ['host', None, None]},
+        'DEL_CUSTOM_HOST_VAR':
+            {'global': False, 'args': ['host', None]},
         'CHANGE_CUSTOM_SVC_VAR':
             {'global': False, 'args': ['service', None, None]},
         'DEL_CUSTOM_SVC_VAR':
@@ -890,8 +892,16 @@ class ExternalCommandManager:
 
     # CHANGE_CUSTOM_HOST_VAR;<host_name>;<varname>;<varvalue>
     def CHANGE_CUSTOM_HOST_VAR(self, host, varname, varvalue):
+        logger.info("[TFLK] CHANGE_CUSTOM_HOST_VAR1 %s %s %s", host, varname, varvalue)
         host.modified_attributes |= DICT_MODATTR["MODATTR_CUSTOM_VARIABLE"].value
         host.customs[varname.upper()] = varvalue
+        self.sched.get_and_register_status_brok(host)
+
+    def DEL_CUSTOM_HOST_VAR(self, host, varname):
+        host.modified_attributes |= DICT_MODATTR["MODATTR_CUSTOM_VARIABLE"].value
+        if varname.upper() in host.customs:
+            del host.customs[varname.upper()]
+        self.sched.get_and_register_status_brok(host)
 
     # CHANGE_CUSTOM_SVC_VAR;<host_name>;<service_description>;<varname>;<varvalue>
     def CHANGE_CUSTOM_SVC_VAR(self, service, varname, varvalue):
