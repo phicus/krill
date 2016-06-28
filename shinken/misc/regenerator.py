@@ -975,7 +975,7 @@ class Regenerator(object):
         clean_prop = ['id', 'check_command', 'hostgroups',
                       'contacts', 'notification_period', 'contact_groups',
                       'check_period', 'event_handler',
-                      'maintenance_period', 'realm', 'customs', 'escalations']
+                      'maintenance_period', 'realm', 'escalations']
 
         # some are only use when a topology change happened
         toplogy_change = b.data['topology_change']
