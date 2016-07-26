@@ -62,6 +62,8 @@ class PerfDef(object):
         if len(perf_def) == 7:
             self.exceptions = perf_def[6]
 
+        self.low_critical = self.low_warning = self.warning = self.critical = None
+
         if len(thresholds) == 0:
             self.low_critical = self.low_warning = self.warning = self.critical = None
         if len(thresholds) == 2:
