@@ -360,23 +360,23 @@ class SnmpPoller(object):
         '''
         http://pysnmp.sourceforge.net/examples/current/v3arch/oneliner/manager/cmdgen/get-threaded-multiple-transports-and-protocols.html
         '''
-        logger.warning("[SnmpPoller] sync 1")
+        # logger.warning("[SnmpPoller] sync 1")
         if not self.targets:
             return
         elif len(self.targets) == 1:
             responses = self._get_responses_by_myself()
         else:
             responses = self._get_responses_by_pool()
-        logger.warning("[SnmpPoller] sync 2")
+        # logger.warning("[SnmpPoller] sync 2")
 
         for errorIndication, errorStatus, errorIndex, varBinds, cbCtx in responses:
             sendRequestHandle = None
             self.callback(sendRequestHandle, errorIndication, errorStatus, errorIndex, varBinds, cbCtx)
 
-        logger.warning("[SnmpPoller] sync 3")
+        # logger.warning("[SnmpPoller] sync 3")
         for object_to_poll in self.objects_to_poll:
             object_to_poll.consolidate()
-        logger.warning("[SnmpPoller] sync 4")
+        # logger.warning("[SnmpPoller] sync 4")
 
     def _get_responses_by_myself(self):
         authData, transportTarget, getVarNames, walkVarNames = self.targets[0]
