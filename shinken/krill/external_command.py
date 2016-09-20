@@ -19,6 +19,7 @@ class KrillExternalCommands(object):
 
 
     def load_external_queue(self, from_q):
+        logger.info("[EC] load_external_queue %s" % from_q)
         self.from_q = from_q
 
 
@@ -119,6 +120,7 @@ class KrillExternalCommands(object):
     def push_extcmd(self, extcmd):
         e = ExternalCommand(extcmd)
         if self.from_q:
+            logger.info("[EC] push_extcmd!!")
             self.from_q.put(e)
         else:
             logger.info("[EC] push_extcmd e=%s" % e)

@@ -437,5 +437,5 @@ def test_process_perfdata():
 
 
 if __name__ == '__main__':
-    test_process_raw_perfdata()
-
+    #test_process_raw_perfdata()
+    test_process_perfdata()

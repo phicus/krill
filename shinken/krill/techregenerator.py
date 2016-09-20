@@ -2,7 +2,10 @@
 # -*- coding: utf-8 -*-
 
 from shinken.objects.host import Host, Hosts
+from shinken.objects.hostgroup import Hostgroup, Hostgroups
+
 from shinken.util import safe_print
+from shinken.log import logger
 
 
 CPEKEY_BY_TECH = {
@@ -27,8 +30,10 @@ class TechRegenerator(object):
 
         self.indices = {}
         self.hosts = Hosts([])
+        self.hostgroups = Hostgroups([])
 
         self.inp_hosts = {}
+        self.inp_hostgroups = {}
 
 
     def load_external_queue(self, from_q):
@@ -51,6 +56,7 @@ class TechRegenerator(object):
         c_id = data['instance_id']
         # print 'TECH manage_program_status_brok', b.data
         self.inp_hosts[c_id] = Hosts([])
+        self.inp_hostgroups[c_id] = Hostgroups([])
 
 
     def manage_initial_host_status_brok(self, b):
@@ -93,6 +99,31 @@ class TechRegenerator(object):
             h.state = data['state']
 
 
+    def manage_initial_hostgroup_status_brok(self, b):
+        data = b.data
+        hgname = data['hostgroup_name']
+        inst_id = data['instance_id']
+
+        # Try to get the inp progress Hostgroups
+        try:
+            inp_hostgroups = self.inp_hostgroups[inst_id]
+        except Exception, exp:  # not good. we will cry in theprogram update
+            logger.error("[regen] host_check_result:: Not good!   %s" % exp)
+            return
+
+        logger.debug("Creating a hostgroup: %s in instance %d" % (hgname, inst_id))
+
+        # With void members
+        hg = Hostgroup([])
+
+        # populate data
+        self.update_element(hg, data)
+
+        # We will link hosts into hostgroups later
+        # so now only save it
+        inp_hostgroups[hg.id] = hg
+
+
     def manage_initial_broks_done_brok(self, b):
         inst_id = b.data['instance_id']
         print "TECH Finish the configuration of instance", inst_id
@@ -103,18 +134,45 @@ class TechRegenerator(object):
         print "TECH all_done_linking", inst_id, self.inp_hosts
         try:
             inp_hosts = self.inp_hosts[inst_id]
+            inp_hostgroups = self.inp_hostgroups[inst_id]
         except Exception, exp:
             print "Warning all done: ", exp
             return
 
+        # Link HOSTGROUPS with hosts
+        for hg in inp_hostgroups:
+            new_members = []
+            for (i, hname) in hg.members:
+                h = inp_hosts.find_by_name(hname)
+                if h:
+                    new_members.append(h)
+            hg.members = new_members
+
+        # Merge HOSTGROUPS with real ones
+        for inphg in inp_hostgroups:
+            hgname = inphg.hostgroup_name
+            hg = self.hostgroups.find_by_name(hgname)
+            # If hte hostgroup already exist, just add the new
+            # hosts into it
+            if hg:
+                hg.members.extend(inphg.members)
+            else:  # else take the new one
+                self.hostgroups.add_item(inphg)
+
+        # Now link HOSTS with hostgroups, and commands
+        print "TECH HOSTS?"
         for h in inp_hosts:
-            # print "TECH add h", h
+            print "TECH add h", h
+            new_hostgroups = []
+            for hgname in h.hostgroups.split(','):
+                hgname = hgname.strip()
+                hg = self.hostgroups.find_by_name(hgname)
+                if hg:
+                    new_hostgroups.append(hg)
+            h.hostgroups = new_hostgroups
+
             self.hosts.add_item(h)
 
         # clean old objects
         del self.inp_hosts[inst_id]
-
-if __name__ == '__main__':
-    data = {'_LAT': 12, '_LNG':24}
-    h = TechCpe('fake', data, ['_LAT', 'dummy'])
-    print h._LAT, h.dummy
+        del self.inp_hostgroups[inst_id]

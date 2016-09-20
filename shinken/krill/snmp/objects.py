@@ -71,11 +71,14 @@ def get_snmp_objects(snmp_client, cls, subindex=None):
                 time.sleep(TIME_TO_WAIT_BETWEEN_RETRIES)
 
             try:
+                # print 'TFLK-WALK1', oid, subindex, timeout, retries, kwargs, '...'
                 walk_data = snmp_client.walk(oid, subindex, timeout, retries, **kwargs)
+                # print 'TFLK-WALK2 ...', len(walk_data)
             except errind.OidNotIncreasing:
                 errind_OidNotIncreasing = True
                 walk_data = []
             except Exception, exc:
+                print 'Exception', exc
                 logger.warning("[SNMP] _get_walk_data_up_to_len Exception: %s", exc)
                 raise exc
             # except SnmpRuntimeError, exc:
@@ -92,18 +95,18 @@ def get_snmp_objects(snmp_client, cls, subindex=None):
     snmp_objects = []
     cls_properties = getattr(cls, 'properties')
     data_len = 0
-    try:
-        for field, field_property in cls_properties.iteritems():
-            # logger.info("[SNMP] field----->%s", field)
-            if not field_property.oid:
-                continue
+    for field, field_property in cls_properties.iteritems():
+        # logger.info("[SNMP] field----->%s", field)
+        if not field_property.oid:
+            continue
 
+        try:
             timeout = getattr(cls, 'timeout', 3)
             retries = getattr(cls, 'retries', 1)
             walk_data_list = _get_walk_data_up_to_len(len(snmp_objects), field_property.oid, timeout, retries, **field_property.kwargs)
 
             for walk_index, walk_data in walk_data_list:
-                # logger.info("[SNMP] get_snmp_objects walk_index/walk_data %r/%r" % (walk_index, walk_data))
+
                 current_index = None
                 current_subindex = None
                 for index, _ in snmp_objects:
@@ -113,17 +116,11 @@ def get_snmp_objects(snmp_client, cls, subindex=None):
                         current_index = index
                         current_subindex = walk_index[len(index):]
 
-                # logger.info("[SNMP]get_snmp_objects current_index/current_subindex %r/%r" % (current_index, current_subindex))
                 if current_index:
                     o, = [o for i,o in snmp_objects if i == current_index]
                 else:
                     o = cls()
                     snmp_objects.append((walk_index, o))
-
-                # logger.info("[SnmpObjects]get_snmp_objects->setattr1 %s/%s/%s/%s/%s", field, walk_data, walk_index, current_index, current_subindex)
-                # logger.info("[SnmpObjects]get_snmp_objects->setattr1 client=%s %s/%s/%s/%s/%s", snmp_client, field, walk_data, walk_index, current_index, current_subindex)
-                # logger.info("[SnmpObjects]get_snmp_objects->setattr2 %s -> %s", walk_data.itervalues().next(), current_subindex)
-                # o.setattr(field, walk_data.itervalues().next(), current_subindex)
 
                 data_to_set = walk_data.itervalues().next()
                 if field_property.method == 'get':
@@ -131,10 +128,10 @@ def get_snmp_objects(snmp_client, cls, subindex=None):
                 else:
                     o.appendattr(field, (tuple(current_subindex), data_to_set))
 
+        except SnmpRuntimeError, exc:
+            # print 'SnmpRuntimeError', exc
+            pass
 
-    except SnmpRuntimeError, exc:
-        # print 'SnmpRuntimeError', exc
-        pass
 
     return snmp_objects
 

@@ -26,6 +26,6 @@ from shinken.misc.regenerator import Regenerator
 
 class KrillRegenerator(Regenerator):
     def __init__(self, techs=[], handle_services=False):
-        super(LiveStatusRegenerator, self).__init__()
+        super(KrillRegenerator, self).__init__()
         self.techs = techs
         self.handle_services = handle_services
