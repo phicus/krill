@@ -24,7 +24,14 @@ CHUNK_SIZE = 5000
 class SnmpPollerException(Exception):
     pass
 
-class GoodEnoughSnmpPollerException(Exception):
+
+class TimeoutSnmpPollerException(SnmpPollerException):
+    pass
+
+class TaskAreNotWorkingSnmpPollerException(SnmpPollerException):
+    pass
+
+class GoodEnoughSnmpPollerException(SnmpPollerException):
     pass
 
 
@@ -33,7 +40,7 @@ class TimeoutQueue(Queue):
     def __init__(self, *args, **kwargs):
         Queue.__init__(self, *args, **kwargs)
         self.failed_loops = -2
-        self.last_unfinished_tasks = None
+        self.last_unfinished_tasks = -1
         self.init_unfinished_tasks = None
         self.reset()
 
@@ -48,14 +55,14 @@ class TimeoutQueue(Queue):
 
     def tasks_are_working(self):
         MAX_FAILED_LOOPS = 3
-        GOOD_ENOUGH_FINISHED_TASKS_PERCENTAGE = 0.5
+        GOOD_ENOUGH_FINISHED_TASKS_PERCENTAGE = 4.5
+        GOOD_ENOUGH_FINISHED_TASKS_NUMBER = 5
 
         logger.info('[SnmpPoller] tasks_are_working self.failed_loops=%d', self.failed_loops)
         if self.failed_loops == -1:
             self.failed_loops = 0
             return True
 
-        logger.info('[SnmpPoller] tasks_are_working self.unfinished_tasks=%d self.last_unfinished_tasks=%d', self.unfinished_tasks, self.last_unfinished_tasks)
         if self.last_unfinished_tasks > self.unfinished_tasks:
             logger.info('[SnmpPoller] tasks_are_working last=%d <- unfinished=%d', self.last_unfinished_tasks, self.unfinished_tasks)
             self.last_unfinished_tasks = self.unfinished_tasks
@@ -70,8 +77,8 @@ class TimeoutQueue(Queue):
                     logger.warning("[SnmpPoller] tasks_are_working: unfinished_tasks=%d init_unfinished_tasks=%d", self.unfinished_tasks, self.init_unfinished_tasks)
                     pct_unfinished_tasks = 0
 
-                if pct_unfinished_tasks < GOOD_ENOUGH_FINISHED_TASKS_PERCENTAGE:
-                    raise GoodEnoughSnmpPollerException()
+                if pct_unfinished_tasks < GOOD_ENOUGH_FINISHED_TASKS_PERCENTAGE or self.unfinished_tasks < GOOD_ENOUGH_FINISHED_TASKS_NUMBER:
+                    raise GoodEnoughSnmpPollerException("Unfinished tasks: %d (%.2f%%)" % (self.unfinished_tasks, pct_unfinished_tasks))
                 else:
                     return False
             else:
@@ -79,8 +86,10 @@ class TimeoutQueue(Queue):
 
 
     def join_with_timeout(self, timeout):
-        self.last_unfinished_tasks = self.init_unfinished_tasks
+        logger.info("[SnmpPoller] join_with_timeout starts... tasks: %d", self.unfinished_tasks)
+        self.last_unfinished_tasks = self.unfinished_tasks
         self.init_unfinished_tasks = self.unfinished_tasks
+
         self.all_tasks_done.acquire()
         try:
             endtime = time.time() + timeout
@@ -90,18 +99,26 @@ class TimeoutQueue(Queue):
                 logger.info("[SnmpPoller] time remaining: %s unfinished tasks: %d", remaining, self.unfinished_tasks)
                 syslog.syslog(syslog.LOG_DEBUG, "[SnmpPoller] time remaining: %s unfinished tasks: %d" % (remaining, self.unfinished_tasks))
                 if not self.tasks_are_working():
-                    raise SnmpPollerException("[SnmpPoller] tasks are not working!")
+                    raise TaskAreNotWorkingSnmpPollerException("[SnmpPoller] tasks are not working!")
 
                 if remaining <= 0.0:
                     logger.info("[SnmpPoller] timeout!")
-                    raise SnmpPollerException("[SnmpPoller] polling timeout!")
+                    raise TimeoutSnmpPollerException("[SnmpPoller] polling timeout!")
                 self.all_tasks_done.wait(5)
-        except GoodEnoughSnmpPollerException:
-            logger.warning("[SnmpPoller] join_with_timeout GoodEnoughSnmpPollerException!")
-            self.all_tasks_done.release()
-        finally:
-            logger.info("[SnmpPoller] join_with_timeout finally!")
-            self.all_tasks_done.release()
+        except Exception, exc:
+            logger.warning("[SnmpPoller] join_with_timeout Exception -> (%s: %s)!", type(exc), str(exc))
+            try:
+                self.all_tasks_done.release()
+            # except RuntimeError, exc:
+            except Exception, exc:
+                logger.warning("[SnmpPoller] join_with_timeout->Exception->self.all_tasks_done.release RuntimeError (type=%s: %s)!", type(exc), exc)
+        else:
+            logger.info("[SnmpPoller] join_with_timeout else!")
+            try:
+                self.all_tasks_done.release()
+            # except RuntimeError, exc:
+            except Exception, exc:
+                logger.warning("[SnmpPoller] join_with_timeout->else->self.all_tasks_done.release RuntimeError (type=%s: %s)!", type(exc), exc)
 
 
 class Worker(Thread):
