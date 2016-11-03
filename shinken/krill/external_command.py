@@ -120,7 +120,7 @@ class KrillExternalCommands(object):
     def push_extcmd(self, extcmd):
         e = ExternalCommand(extcmd)
         if self.from_q:
-            logger.info("[EC] push_extcmd!!")
+            # logger.info("[EC] push_extcmd!!")
             self.from_q.put(e)
         else:
             logger.info("[EC] push_extcmd e=%s" % e)
