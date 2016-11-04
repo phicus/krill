@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import time
+import collections
 
 from shinken.log import logger
 from shinken.external_command import ExternalCommand
@@ -24,12 +25,14 @@ class KrillExternalCommands(object):
 
 
     def reset(self):
-        self.host_services = {}
+        self.host_services = collections.defaultdict(dict)
         self.extcmds = []
 
 
-    def process_host_check_result(self, host_name, state_string, output, force=True):
+    def process_host_check_result(self, host_name, state_string, output, force=False):
+        logger.info("[EC] process_host_check_result ?? %s %s %s %s", host_name, state_string, output, force)
         if force or not self._yet(host_name, '__HOST__'):
+            logger.info("[EC] process_host_check_result !!")
             self._set(host_name, '__HOST__', self.HOSTSTATES[state_string], output)
 
 
@@ -40,8 +43,9 @@ class KrillExternalCommands(object):
         self.push_extcmd(extcmd)
 
 
-    def process_service_check_result(self, host, service, state_string, output):
-        self._set(host, service, self.SERVICESTATES[state_string], output)
+    def process_service_check_result(self, host_name, service, state_string, output, force=False):
+        if force or not self._yet(host_name, service):
+            self._set(host_name, service, self.SERVICESTATES[state_string], output)
 
 
     def push_process_service_check_result(self, host_name, service, state_string, output):
@@ -51,16 +55,12 @@ class KrillExternalCommands(object):
         self.push_extcmd(extcmd)
 
 
-    def _yet(self, host, service):
-        return host not in self.host_services or service not in self.host_services[host]
+    def _yet(self, host_name, service):
+        return host_name in self.host_services and service in self.host_services[host_name]
 
 
-    def _set(self, host, service, state, output):
-        # host = 'cpe%d' % cpe.id
-        if host not in self.host_services:
-            self.host_services[host] = {}
-
-        self.host_services[host][service] = (int(time.time()), state, output)
+    def _set(self, host_name, service, state, output):
+        self.host_services[host_name][service] = (int(time.time()), state, output)
 
 
     def add_simple_host_dependency(self, son, father):
@@ -124,3 +124,11 @@ class KrillExternalCommands(object):
             self.from_q.put(e)
         else:
             logger.info("[EC] push_extcmd e=%s" % e)
+
+if __name__ == '__main__':
+    host_name = 'fake'
+    ec = KrillExternalCommands()
+    ec.process_host_check_result(host_name, 'UP', 'bla bla', force=True)
+    print 'HS1', ec.host_services
+    ec.process_host_check_result(host_name, 'DOWN', 'nasti', force=True)
+    print 'HS2', ec.host_services
