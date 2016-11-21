@@ -36,6 +36,13 @@ class KrillExternalCommands(object):
             self._set(host_name, '__HOST__', self.HOSTSTATES[state_string], output)
 
 
+    def push_change_host_var(self, host_name, varname, varvalue):
+        logger.info("[EC] push_change_host_var %s %s %s", host_name, varname, varvalue)
+        extcmd = '[%d] %s;%s;%s;%s' % (int(time.time()), 'CHANGE_HOST_VAR', host_name, varname, varvalue)
+        logger.info("[EC] push_change_host_var extcmd=%s", extcmd)
+        self.push_extcmd(extcmd)
+
+
     def push_process_host_check_result(self, host_name, state_string, output):
         ts = int(time.time())
         state = self.HOSTSTATES[state_string]
