@@ -436,6 +436,18 @@ class Host(SchedulingItem):
         'customs':
             StringProp(default={}, fill_brok=['full_status']),
 
+        'cpe_address':
+            StringProp(fill_brok=['full_status'], retention=True),
+
+        'cpe_registration_host':
+            StringProp(default='', fill_brok=['full_status'], retention=True),
+
+        'cpe_registration_id':
+            StringProp(default='', fill_brok=['full_status'], retention=True),
+
+        'cpe_connection_request_url':
+            StringProp(default='', fill_brok=['full_status'], retention=True),
+
         'got_default_realm':
             BoolProp(default=False),
 
@@ -610,6 +622,12 @@ class Host(SchedulingItem):
         'TOTALHOSTSERVICESUNKNOWN': 'get_total_services_unknown',
         'TOTALHOSTSERVICESCRITICAL': 'get_total_services_critical',
         'HOSTBUSINESSIMPACT':  'business_impact',
+
+        'CPEADDRESS':               'cpe_address',
+        'CPECONNECTIONREQUESTURL':  'cpe_connection_request_url',
+        'CPEREGISTRATIONHOST':      'cpe_registration_host',
+        'CPEREGISTRATIONID':        'cpe_registration_id',
+
         # Business rules output formatting related macros
         'STATUS':            'get_status',
         'SHORTSTATUS':       'get_short_status',
