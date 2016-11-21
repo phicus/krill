@@ -422,6 +422,8 @@ class ExternalCommandManager:
             {'global': False, 'args': ['host']},
         'UNPROVISION_ONU':
             {'global': False, 'args': ['host', None]},
+        'CHANGE_HOST_VAR':
+            {'global': False, 'args': ['host', None, None]},
     }
 
     def __init__(self, conf, mode):
@@ -2135,6 +2137,12 @@ class ExternalCommandManager:
         logger.info("[TFLK] UNPROVISION_ONU %s %s", host.host_name, onu_index)
         b = Brok('unprovision_onu', {'host_name': host.host_name, 'onu_index': onu_index})
         host.broks.append(b)
+
+
+    def CHANGE_HOST_VAR(self, host, varname, varvalue):
+        logger.info("[TFLK] CHANGE_HOST_VAR %s %s %s", host, varname, varvalue)
+        setattr(host, varname, varvalue)
+        self.sched.get_and_register_status_brok(host)
 
 
 if __name__ == '__main__':
