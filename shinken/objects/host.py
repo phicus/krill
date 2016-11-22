@@ -437,13 +437,19 @@ class Host(SchedulingItem):
             StringProp(default={}, fill_brok=['full_status']),
 
         'cpe_address':
-            StringProp(fill_brok=['full_status'], retention=True),
+            StringProp(default='', fill_brok=['full_status'], retention=True),
 
         'cpe_registration_host':
             StringProp(default='', fill_brok=['full_status'], retention=True),
 
         'cpe_registration_id':
             StringProp(default='', fill_brok=['full_status'], retention=True),
+
+        'cpe_registration_state':
+            StringProp(default='', fill_brok=['full_status'], retention=True),
+
+        'cpe_registration_tags':
+            ListProp(default='', fill_brok=['full_status'], retention=True, split_on_coma=True),
 
         'cpe_connection_request_url':
             StringProp(default='', fill_brok=['full_status'], retention=True),
