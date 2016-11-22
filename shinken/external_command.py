@@ -2134,15 +2134,17 @@ class ExternalCommandManager:
 
 
     def UNPROVISION_ONU(self, host, onu_index):
-        logger.info("[TFLK] UNPROVISION_ONU %s %s", host.host_name, onu_index)
         b = Brok('unprovision_onu', {'host_name': host.host_name, 'onu_index': onu_index})
         host.broks.append(b)
 
 
     def CHANGE_HOST_VAR(self, host, varname, varvalue):
-        logger.info("[TFLK] CHANGE_HOST_VAR %s %s %s", host, varname, varvalue)
-        setattr(host, varname, varvalue)
-        self.sched.get_and_register_status_brok(host)
+        cls = host.__class__
+        if varname in cls.running_properties:
+            setattr(host, varname, varvalue)
+            self.sched.get_and_register_status_brok(host)
+        else:
+            logger.info("[EXTERNAL COMMAND] CHANGE_HOST_VAR: varname=%s not writable", varname)
 
 
 if __name__ == '__main__':
