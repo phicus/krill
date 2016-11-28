@@ -15,19 +15,28 @@ from shinken.log import logger
 
 
 class AttrDict(dict):
+
     def __init__(self, *args, **kwargs):
         super(AttrDict, self).__init__(*args, **kwargs)
         self.__dict__ = self
 
 
 class SnmpClient(object):
+
     def __init__(self, host, port, community, mibs=[], mibSources=[], timeout=20, retries=1, version=2):
         self.host = host
         self.port = port
         self.community = community
         self.mibs = mibs
         self.mibSources = mibSources
+        self.timeout = timeout
+        self.retries = retries
+        self.version = version
 
+        self.init()
+
+
+    def init(self):
         self._snmpEngine = engine.SnmpEngine()
 
         ## SecurityName <-> CommunityName mapping
@@ -49,7 +58,7 @@ class SnmpClient(object):
         )
         config.addTargetAddr(
             self._snmpEngine, 'my-router',
-            udp.domainName, (host, port),
+            udp.domainName, (self.host, self.port),
             'my-creds'
         )
         self.mibBuilder = builder.MibBuilder()
@@ -61,8 +70,8 @@ class SnmpClient(object):
             self.mibBuilder.loadModules( *self.mibs )
         self.mibViewController = view.MibViewController(self.mibBuilder)
 
-        self.auth_data = cmdgen.CommunityData('krill', self.community, version-1)
-        self.udp_transport_target = cmdgen.UdpTransportTarget((self.host, self.port), timeout=timeout, retries=retries)
+        self.auth_data = cmdgen.CommunityData('krill', self.community, self.version-1)
+        self.udp_transport_target = cmdgen.UdpTransportTarget((self.host, self.port), timeout=self.timeout, retries=self.retries)
 
 
     def __str__(self):
