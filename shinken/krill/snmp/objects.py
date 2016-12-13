@@ -79,7 +79,7 @@ def get_snmp_objects(snmp_client, cls, subindex=None):
                 walk_data = []
             except Exception, exc:
                 print 'Exception', exc
-                logger.warning("[SNMP] _get_walk_data_up_to_len Exception: %s", exc)
+                logger.warning("[SNMP] _get_walk_data_up_to_len (client=%s/oid=%s) Exception: %s", snmp_client, oid, exc)
                 raise exc
             # except SnmpRuntimeError, exc:
             #     walk_data = []

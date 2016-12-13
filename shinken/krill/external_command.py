@@ -30,15 +30,16 @@ class KrillExternalCommands(object):
 
 
     def process_host_check_result(self, host_name, state_string, output, force=False):
-        logger.info("[EC] process_host_check_result ?? %s %s %s %s", host_name, state_string, output, force)
+        # logger.info("[EC] process_host_check_result ?? %s %s %s %s", host_name, state_string, output, force)
         if force or not self._yet(host_name, '__HOST__'):
-            logger.info("[EC] process_host_check_result !!")
+            # logger.info("[EC] process_host_check_result !!")
             self._set(host_name, '__HOST__', self.HOSTSTATES[state_string], output)
 
 
     def push_change_host_var(self, host, varname, varvalue):
-        logger.info("[EC] push_change_host_var... %s %s %s", host, varname, varvalue)
+        # logger.info("[EC] push_change_host_var? %s %s %s", host, varname, varvalue)
         if host and getattr(host, varname) != varvalue:
+            # logger.info("[EC] push_change_host_var! %s %s %s", host.host_name, varname, varvalue)
             extcmd = '[%d] %s;%s;%s;%s' % (int(time.time()), 'CHANGE_HOST_VAR', host.host_name, varname, varvalue)
             self.push_extcmd(extcmd)
 
@@ -113,11 +114,11 @@ class KrillExternalCommands(object):
                 yield l[i:i+n]
 
         logger.info("[EC] send_all...")
-        COMMAND_CHUNK_SIZE = 500
+        COMMAND_CHUNK_SIZE = 100
         self_all = self.all()
         for chunk in chunks(self_all, COMMAND_CHUNK_SIZE):
             for extcmd in chunk:
-                logger.debug("[EC] send_all extcmd=%s" % extcmd)
+                logger.info("[EC] send_all extcmd=%s" % extcmd)
                 self.push_extcmd(extcmd)
             time.sleep(1)
             logger.debug("[EC] sleep")
@@ -130,7 +131,7 @@ class KrillExternalCommands(object):
             # logger.info("[EC] push_extcmd!!")
             self.from_q.put(e)
         else:
-            logger.info("[EC] push_extcmd e=%s" % e)
+            logger.info("[EC] push_extcmd no from_q! e=%s" % extcmd)
 
 if __name__ == '__main__':
     host_name = 'fake'
