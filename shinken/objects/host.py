@@ -454,6 +454,9 @@ class Host(SchedulingItem):
         'cpe_connection_request_url':
             StringProp(default='', fill_brok=['full_status'], retention=True),
 
+        'cpe_ipleases':
+            StringProp(default='', fill_brok=['full_status'], retention=True),
+
         'got_default_realm':
             BoolProp(default=False),
 
