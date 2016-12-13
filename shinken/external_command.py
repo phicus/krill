@@ -439,7 +439,7 @@ class ExternalCommandManager:
             self.contactgroups = conf.contactgroups
             self.timeperiods = conf.timeperiods
             self.pipe_path = conf.command_file
-            self.cpes = conf.cpes
+            # self.cpes = conf.cpes
 
         self.fifo = None
         self.cmd_fragments = ''
